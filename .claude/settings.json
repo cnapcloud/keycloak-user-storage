@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew build -x test)",
+      "Bash(curl -s http://localhost:8081/user/count/all)",
+      "Bash(./gradlew test)",
+      "Bash(./gradlew test --rerun)",
+      "Bash(mvn test -pl . -Dtest=UserRestRepositoryConnectivityTest -q)",
+      "Bash(mvn test -Dtest=UserAdapterIntegrationTest -q)",
+      "Bash(mvn test -Dtest=UserRestRepositoryLookupTest -q)",
+      "Bash(./gradlew build -x test -q)",
+      "Bash(curl -s http://localhost:8081/user/username/emily)",
+      "Bash(mvn test -q)",
+      "Bash(mvn test)",
+      "Bash(./gradlew test -q)"
+    ],
+    "additionalDirectories": [
+      "/Users/lemon/Devel/apps/keycloak-user-storage/.claude/conventions",
+      "/Users/lemon/.claude/projects/-Users-lemon-Devel-apps-keycloak-user-storage"
+    ]
+  }
+}

@@ -1,0 +1,90 @@
+plugins {
+    id 'org.springframework.boot' version '3.3.4'
+    id 'io.spring.dependency-management' version '1.0.13.RELEASE'
+    id 'java'
+    id 'java-library'
+    id 'maven-publish'
+    id "jacoco"
+}
+
+
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
+
+compileJava.options.encoding = "UTF-8"
+compileJava.options.compilerArgs += ['-parameters']
+compileTestJava.options.encoding = "UTF-8"
+compileTestJava.options.compilerArgs += ['-parameters']
+
+group = 'com.peanut'
+version = '0.0.1-SNAPSHOT'
+
+configurations {
+   all {
+     exclude group: 'commons-logging', module: 'common-logging'
+     exclude group: 'org.slf4j', module: 'slf4j-simple'
+
+     resolutionStrategy.eachDependency { details ->
+         if (details.requested.group.startsWith('com.fasterxml.jackson.') ) {
+              details.useVersion "2.15.2"
+          }
+     }
+  }
+}
+
+repositories {
+    mavenCentral()
+	maven {
+      url="http://reposilite.kind.internal/releases"
+        metadataSources {
+            mavenPom()
+            artifact()
+       }
+       allowInsecureProtocol true
+    }
+}
+
+dependencyManagement {
+  imports {
+    mavenBom "org.springframework.cloud:spring-cloud-dependencies:2023.0.4"
+  }
+}
+
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.0' // JSON 처리
+    runtimeOnly 'com.h2database:h2' 
+    implementation 'org.slf4j:slf4j-api'
+    compileOnly 'org.projectlombok:lombok:1.18.34'
+    annotationProcessor 'org.projectlombok:lombok:1.18.34'
+    
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'junit:junit'
+    testImplementation "org.junit.vintage:junit-vintage-engine"
+    testImplementation 'org.apache.httpcomponents.client5:httpclient5'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.34'
+
+}
+
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events = ["PASSED", "SKIPPED", "FAILED"]
+        exceptionFormat = "full"
+        displayGranularity = 1
+        showStandardStreams = true
+    }
+}
+
+bootJar {
+    enabled = true
+    mainClass = 'com.keycloak.userstorage.UserApplication'
+}
+
+
+
+				

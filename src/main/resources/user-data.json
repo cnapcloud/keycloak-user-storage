@@ -1,0 +1,223 @@
+[
+  {
+    "username": "admin",
+    "firstName": "admin",
+    "lastName": "system",
+    "email": "admin@cnapcloud.com",
+    "enabled": true,
+    "emailVerified": true,
+    "attributes": {
+      "dormantStatus": "ACTIVE",
+      "phoneNumber": "821012345601",
+      "otpMethod": "SKIP"
+    }
+  },
+  {
+    "username": "john",
+    "firstName": "john",
+    "lastName": "doe",
+    "email": "john@cnapcloud.com",
+    "enabled": true,
+    "emailVerified": false,
+    "attributes": {
+      "dormantStatus": "ACTIVE",
+      "phoneNumber": "821012345602",
+      "otpMethod": "SKIP"
+    }
+  },
+  {
+    "username": "jane",
+    "firstName": "jane",
+    "lastName": "doe",
+    "email": "jane@cnapcloud.com",
+    "enabled": true,
+    "emailVerified": false,
+    "attributes": {
+      "dormantStatus": "ACTIVE",
+      "phoneNumber": "821012345603",
+      "otpMethod": "SKIP"
+    }
+  },
+  {
+    "username": "samuel",
+    "firstName": "samuel",
+    "lastName": "green",
+    "email": "samuel@cnapcloud.com",
+    "enabled": true,
+    "emailVerified": false,
+    "attributes": {
+      "dormantStatus": "ACTIVE",
+      "phoneNumber": "821012345604",
+      "otpMethod": "SKIP"
+    }
+  },
+  {
+    "username": "emily",
+    "firstName": "emily",
+    "lastName": "white",
+    "email": "emily@cnapcloud.com",
+    "enabled": true,
+    "emailVerified": false,
+    "attributes": {
+      "dormantStatus": "ACTIVE",
+      "phoneNumber": "821012345605",
+      "otpMethod": "SKIP"
+    }
+  },
+  {
+    "username": "michael",
+    "firstName": "michael",
+    "lastName": "brown",
+    "email": "michael@cnapcloud.com",
+    "enabled": true,
+    "emailVerified": false,
+    "attributes": {
+      "dormantStatus": "ACTIVE",
+      "phoneNumber": "821012345606",
+      "otpMethod": "SKIP"
+    }
+  },
+  {
+    "username": "sarah",
+    "firstName": "sarah",
+    "lastName": "smith",
+    "email": "sarah@cnapcloud.com",
+    "enabled": true,
+    "emailVerified": false,
+    "attributes": {
+      "dormantStatus": "ACTIVE",
+      "phoneNumber": "821012345607",
+      "otpMethod": "SKIP"
+    }
+  },
+  {
+    "username": "david",
+    "firstName": "david",
+    "lastName": "johnson",
+    "email": "david@cnapcloud.com",
+    "enabled": true,
+    "emailVerified": false,
+    "attributes": {
+      "dormantStatus": "ACTIVE",
+      "phoneNumber": "821012345608",
+      "otpMethod": "SKIP"
+    }
+  },
+  {
+    "username": "lisa",
+    "firstName": "lisa",
+    "lastName": "black",
+    "email": "lisa@cnapcloud.com",
+    "enabled": true,
+    "emailVerified": false,
+    "attributes": {
+      "dormantStatus": "ACTIVE",
+      "phoneNumber": "821012345609",
+      "otpMethod": "SKIP"
+    }
+  },
+  {
+    "username": "robert",
+    "firstName": "robert",
+    "lastName": "gray",
+    "email": "robert@cnapcloud.com",
+    "enabled": true,
+    "emailVerified": false,
+    "attributes": {
+      "dormantStatus": "ACTIVE",
+      "phoneNumber": "821012345610",
+      "otpMethod": "SKIP"
+    }
+  },
+  {
+    "username": "anna",
+    "firstName": "anna",
+    "lastName": "walker",
+    "email": "anna@cnapcloud.com",
+    "enabled": true,
+    "emailVerified": false,
+    "attributes": {
+      "dormantStatus": "ACTIVE",
+      "phoneNumber": "821012345611",
+      "otpMethod": "SKIP"
+    }
+  },
+  {
+    "username": "charlotte",
+    "firstName": "charlotte",
+    "lastName": "morris",
+    "email": "charlotte@cnapcloud.com",
+    "enabled": true,
+    "emailVerified": false,
+    "attributes": {
+      "dormantStatus": "ACTIVE",
+      "phoneNumber": "821012345612",
+      "otpMethod": "SKIP"
+    }
+  },
+  {
+    "username": "oliver",
+    "firstName": "oliver",
+    "lastName": "taylor",
+    "email": "oliver@cnapcloud.com",
+    "enabled": true,
+    "emailVerified": false,
+    "attributes": {
+      "dormantStatus": "ACTIVE",
+      "phoneNumber": "821012345613",
+      "otpMethod": "SKIP"
+    }
+  },
+  {
+    "username": "amelia",
+    "firstName": "amelia",
+    "lastName": "davis",
+    "email": "amelia@cnapcloud.com",
+    "enabled": true,
+    "emailVerified": false,
+    "attributes": {
+      "dormantStatus": "ACTIVE",
+      "phoneNumber": "821012345614",
+      "otpMethod": "SKIP"
+    }
+  },
+  {
+    "username": "ethan",
+    "firstName": "ethan",
+    "lastName": "wilson",
+    "email": "ethan@cnapcloud.com",
+    "enabled": true,
+    "emailVerified": false,
+    "attributes": {
+      "dormantStatus": "ACTIVE",
+      "phoneNumber": "821012345615",
+      "otpMethod": "SKIP"
+    }
+  },
+  {
+    "username": "isabella",
+    "firstName": "isabella",
+    "lastName": "thomas",
+    "email": "isabella@cnapcloud.com",
+    "enabled": true,
+    "emailVerified": false,
+    "attributes": {
+      "dormantStatus": "ACTIVE",
+      "phoneNumber": "821012345616",
+      "otpMethod": "SKIP"
+    }
+  },
+  {
+    "username": "jackson",
+    "firstName": "jackson",
+    "lastName": "hall",
+    "email": "jackson@cnapcloud.com",
+    "enabled": true,
+    "emailVerified": false,
+    "attributes": {
+      "dormantStatus": "ACTIVE",
+      "phoneNumber": "821012345617",
+      "otpMethod": "SKIP"
+    }
+  }
+]
