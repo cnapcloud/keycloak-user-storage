@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-jdk-slim
+FROM eclipse-temurin:17.0.16_8-jdk
 RUN addgroup --system spring &&  adduser --system spring && adduser spring spring 
 # USER spring:spring
 

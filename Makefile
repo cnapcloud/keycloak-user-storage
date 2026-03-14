@@ -34,7 +34,7 @@ update-tag: ## Update the image tag in GitOps repository
 docker-build-multi: ## push docker image with multi-arch support
 	export BUILDX_NO_DEFAULT_ATTESTATIONS=1 && \
 	export DOCKER_BUILDKIT=1 && \
-	docker buildx build --platform linux/amd64,linux/arm64 -t $(IMAGE_REPOSITORY):$(IMAGE_VERSION) --push .
+	docker buildx build --platform linux/amd64,linux/arm64 -t $(IMAGE_REPOSITORY):$(IMAGE_TAG) --push .
 	clean
 
 clean: ## Clean up Docker builder cache
