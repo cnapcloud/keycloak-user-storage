@@ -1,18 +1,5 @@
 [
   {
-    "username": "admin",
-    "firstName": "admin",
-    "lastName": "system",
-    "email": "admin@cnapcloud.com",
-    "enabled": true,
-    "emailVerified": true,
-    "attributes": {
-      "dormantStatus": "ACTIVE",
-      "phoneNumber": "821012345601",
-      "otpMethod": "SKIP"
-    }
-  },
-  {
     "username": "john",
     "firstName": "john",
     "lastName": "doe",
@@ -21,7 +8,7 @@
     "emailVerified": false,
     "attributes": {
       "dormantStatus": "ACTIVE",
-      "phoneNumber": "821012345602",
+      "phoneNumber": "+821012345602",
       "otpMethod": "SKIP"
     }
   },
@@ -34,7 +21,7 @@
     "emailVerified": false,
     "attributes": {
       "dormantStatus": "ACTIVE",
-      "phoneNumber": "821012345603",
+      "phoneNumber": "+821012345603",
       "otpMethod": "SKIP"
     }
   },
@@ -47,7 +34,7 @@
     "emailVerified": false,
     "attributes": {
       "dormantStatus": "ACTIVE",
-      "phoneNumber": "821012345604",
+      "phoneNumber": "+821012345604",
       "otpMethod": "SKIP"
     }
   },
@@ -60,7 +47,7 @@
     "emailVerified": false,
     "attributes": {
       "dormantStatus": "ACTIVE",
-      "phoneNumber": "821012345605",
+      "phoneNumber": "+821012345605",
       "otpMethod": "SKIP"
     }
   },
@@ -73,7 +60,7 @@
     "emailVerified": false,
     "attributes": {
       "dormantStatus": "ACTIVE",
-      "phoneNumber": "821012345606",
+      "phoneNumber": "+821012345606",
       "otpMethod": "SKIP"
     }
   },
@@ -86,7 +73,7 @@
     "emailVerified": false,
     "attributes": {
       "dormantStatus": "ACTIVE",
-      "phoneNumber": "821012345607",
+      "phoneNumber": "+821012345607",
       "otpMethod": "SKIP"
     }
   },
@@ -99,7 +86,7 @@
     "emailVerified": false,
     "attributes": {
       "dormantStatus": "ACTIVE",
-      "phoneNumber": "821012345608",
+      "phoneNumber": "+821012345608",
       "otpMethod": "SKIP"
     }
   },
@@ -112,7 +99,7 @@
     "emailVerified": false,
     "attributes": {
       "dormantStatus": "ACTIVE",
-      "phoneNumber": "821012345609",
+      "phoneNumber": "+821012345609",
       "otpMethod": "SKIP"
     }
   },
@@ -125,7 +112,7 @@
     "emailVerified": false,
     "attributes": {
       "dormantStatus": "ACTIVE",
-      "phoneNumber": "821012345610",
+      "phoneNumber": "+821012345610",
       "otpMethod": "SKIP"
     }
   },
@@ -138,7 +125,7 @@
     "emailVerified": false,
     "attributes": {
       "dormantStatus": "ACTIVE",
-      "phoneNumber": "821012345611",
+      "phoneNumber": "+821012345611",
       "otpMethod": "SKIP"
     }
   },
@@ -151,7 +138,7 @@
     "emailVerified": false,
     "attributes": {
       "dormantStatus": "ACTIVE",
-      "phoneNumber": "821012345612",
+      "phoneNumber": "+821012345612",
       "otpMethod": "SKIP"
     }
   },
@@ -164,7 +151,7 @@
     "emailVerified": false,
     "attributes": {
       "dormantStatus": "ACTIVE",
-      "phoneNumber": "821012345613",
+      "phoneNumber": "+821012345613",
       "otpMethod": "SKIP"
     }
   },
@@ -177,7 +164,7 @@
     "emailVerified": false,
     "attributes": {
       "dormantStatus": "ACTIVE",
-      "phoneNumber": "821012345614",
+      "phoneNumber": "+821012345614",
       "otpMethod": "SKIP"
     }
   },
@@ -190,7 +177,7 @@
     "emailVerified": false,
     "attributes": {
       "dormantStatus": "ACTIVE",
-      "phoneNumber": "821012345615",
+      "phoneNumber": "+821012345615",
       "otpMethod": "SKIP"
     }
   },
@@ -203,7 +190,7 @@
     "emailVerified": false,
     "attributes": {
       "dormantStatus": "ACTIVE",
-      "phoneNumber": "821012345616",
+      "phoneNumber": "+821012345616",
       "otpMethod": "SKIP"
     }
   },
@@ -216,7 +203,7 @@
     "emailVerified": false,
     "attributes": {
       "dormantStatus": "ACTIVE",
-      "phoneNumber": "821012345617",
+      "phoneNumber": "+821012345617",
       "otpMethod": "SKIP"
     }
   }
