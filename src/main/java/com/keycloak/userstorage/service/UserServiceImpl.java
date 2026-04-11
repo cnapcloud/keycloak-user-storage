@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.keycloak.userstorage.model.MultiAttributeEntry;
 import com.keycloak.userstorage.model.User;
 import com.keycloak.userstorage.repository.UserRepository;
 
@@ -110,6 +111,20 @@ public class UserServiceImpl implements UserService {
                 user.getAttributes().remove(key);
             } else {
                 user.getAttributes().put(key, value);
+            }
+        });
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public void patchMultiAttributes(String id, Map<String, List<String>> attrs) {
+        User user = findByIdOrUsername(id);
+        List<MultiAttributeEntry> multiAttributes = user.getMultiAttributes();
+        attrs.forEach((key, values) -> {
+            multiAttributes.removeIf(entry -> entry.getKey().equals(key));
+            if (values != null && !values.isEmpty()) {
+                values.forEach(value -> multiAttributes.add(new MultiAttributeEntry(key, value)));
             }
         });
         userRepository.save(user);

@@ -1,7 +1,9 @@
 package com.keycloak.userstorage.model;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import jakarta.persistence.CollectionTable;
@@ -39,6 +41,10 @@ public class User {
     @MapKeyColumn(name = "attr_key")
     @Column(name = "attr_value")
     private Map<String, String> attributes = new HashMap<>();
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "USER_MULTI_ATTRIBUTES", joinColumns = @JoinColumn(name = "user_id"))
+    private List<MultiAttributeEntry> multiAttributes = new ArrayList<>();
     
     @PrePersist
     protected void onCreate() {

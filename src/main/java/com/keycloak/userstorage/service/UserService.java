@@ -15,5 +15,6 @@ public interface UserService {
     void updateUser(String id, User patch);
     User createUser(User user);
     void patchAttributes(String id, Map<String, String> attrs);
+    void patchMultiAttributes(String id, Map<String, List<String>> attrs);
     void deleteUser(String id);
 }

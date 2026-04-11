@@ -94,4 +94,12 @@ public class UserController {
         userService.patchAttributes(id, attrs);
         return ResponseEntity.noContent().build();
     }
+
+    @PatchMapping("/{id}/attributes/multi")
+    @Transactional
+    public ResponseEntity<Void> patchMultiAttributes(@PathVariable String id,
+            @RequestBody Map<String, List<String>> attrs) {
+        userService.patchMultiAttributes(id, attrs);
+        return ResponseEntity.noContent().build();
+    }
 }

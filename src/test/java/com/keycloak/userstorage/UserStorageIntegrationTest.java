@@ -17,6 +17,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -37,6 +38,9 @@ import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class UserStorageIntegrationTest {
 
+    @LocalServerPort
+    private int port;
+
     @Autowired
     private TestRestTemplate rest;
 
@@ -56,7 +60,7 @@ class UserStorageIntegrationTest {
     @Order(1)
     void countAll_returnsSeededUserCount() {
         Integer count = rest.getForObject("/user/count/all", Integer.class);
-        assertEquals(17, count, "seed data 17명 기준");
+        assertEquals(16, count, "seed data 16명 기준");
     }
 
     // =========================================================================
@@ -68,7 +72,7 @@ class UserStorageIntegrationTest {
     @SuppressWarnings("unchecked")
     void search_byUsername_returnsMatchWithRequiredFields() {
         ResponseEntity<List<Map<String, Object>>> response = rest.exchange(
-                "/user/search?username=admin", HttpMethod.GET, null,
+                "/user/search?username=john", HttpMethod.GET, null,
                 new ParameterizedTypeReference<>() {});
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -77,7 +81,7 @@ class UserStorageIntegrationTest {
         assertEquals(1, users.size());
 
         Map<String, Object> user = users.get(0);
-        assertEquals("admin", user.get("username"));
+        assertEquals("john", user.get("username"));
         assertNotNull(user.get("id"), "id 필드 필수");
         assertTrue(((String) user.get("id")).startsWith("u-"), "id 포맷: u-XXXXXXXX");
         assertNotNull(user.get("attributes"), "attributes는 절대 null 이면 안 됨");
@@ -115,7 +119,7 @@ class UserStorageIntegrationTest {
     @Test
     @Order(5)
     void count_withFilter_returnsMatchingCount() {
-        Long count = rest.getForObject("/user/count?username=admin", Long.class);
+        Long count = rest.getForObject("/user/count?username=john", Long.class);
         assertEquals(1L, count);
     }
 
@@ -134,7 +138,7 @@ class UserStorageIntegrationTest {
     @Order(7)
     @SuppressWarnings("unchecked")
     void getById_existingUser_returnsFullUserWithAttributes() {
-        String id = getAdminId();
+        String id = getUserId();
 
         ResponseEntity<Map<String, Object>> response = rest.exchange(
                 "/user/" + id, HttpMethod.GET, null,
@@ -146,7 +150,7 @@ class UserStorageIntegrationTest {
 
         // 기본 필드
         assertEquals(id, user.get("id"));
-        assertEquals("admin", user.get("username"));
+        assertEquals("john", user.get("username"));
         assertNotNull(user.get("email"));
         assertNotNull(user.get("enabled"));
         assertNotNull(user.get("emailVerified"));
@@ -232,7 +236,7 @@ class UserStorageIntegrationTest {
     @Order(11)
     void createUser_duplicateUsername_returns409() {
         String body = """
-                {"username": "admin", "email": "another@kind.internal"}
+                {"username": "john", "email": "another@kind.internal"}
                 """;
 
         ResponseEntity<String> response = rest.exchange(
@@ -268,7 +272,7 @@ class UserStorageIntegrationTest {
 
         // count 복원 확인
         Integer count = rest.getForObject("/user/count/all", Integer.class);
-        assertEquals(17, count, "삭제 후 다시 17명");
+        assertEquals(16, count, "삭제 후 다시 16명");
     }
 
     @Test
@@ -287,7 +291,7 @@ class UserStorageIntegrationTest {
     @Order(14)
     @SuppressWarnings("unchecked")
     void patchAttributes_addsNewKey_returns204() {
-        String id = getAdminId();
+        String id = getUserId();
 
         ResponseEntity<Void> patchResponse = rest.exchange(
                 "/user/" + id + "/attributes", HttpMethod.PATCH,
@@ -305,7 +309,7 @@ class UserStorageIntegrationTest {
     @Order(15)
     @SuppressWarnings("unchecked")
     void patchAttributes_nullValueRemovesKey() {
-        String id = getAdminId();
+        String id = getUserId();
 
         // null → 키 제거
         ResponseEntity<Void> patchResponse = rest.exchange(
@@ -324,7 +328,7 @@ class UserStorageIntegrationTest {
     @Order(16)
     @SuppressWarnings("unchecked")
     void patchAttributes_unincludedKeyPreserved() {
-        String id = getAdminId();
+        String id = getUserId();
 
         // testKey만 추가 — phoneNumber는 미포함
         rest.exchange("/user/" + id + "/attributes", HttpMethod.PATCH,
@@ -359,7 +363,7 @@ class UserStorageIntegrationTest {
     @Order(18)
     @SuppressWarnings("unchecked")
     void getCredential_existingUser_returnsAllRequiredFields() {
-        String userId = getAdminId();
+        String userId = getUserId();
 
         ResponseEntity<Map<String, Object>> response = rest.exchange(
                 "/credential/" + userId, HttpMethod.GET, null,
@@ -428,7 +432,7 @@ class UserStorageIntegrationTest {
     @Test
     @Order(22)
     void updateCredential_success_returns204() {
-        String userId = getAdminId();
+        String userId = getUserId();
         String body = """
                 {
                   "value": "newHashValue==",
@@ -510,7 +514,7 @@ class UserStorageIntegrationTest {
                 new ParameterizedTypeReference<>() {});
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(17, response.getBody().size(), "dormantStatus=ACTIVE 는 시드 17명 전원");
+        assertEquals(16, response.getBody().size(), "dormantStatus=ACTIVE 는 시드 16명 전원");
     }
 
     @Test
@@ -521,39 +525,43 @@ class UserStorageIntegrationTest {
                 new ParameterizedTypeReference<>() {});
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(17, response.getBody().size(), "otpMethod=SKIP 는 시드 17명 전원");
+        assertEquals(16, response.getBody().size(), "otpMethod=SKIP 는 시드 16명 전원");
     }
 
     @Test
     @Order(29)
     void search_byAttributeKey_phoneNumber_returnsUser() {
+        // '+' → '%2B' 직접 지정: UriComponentsBuilder.encode()는 +를 인코딩하지 않아
+        // Spring @RequestParam이 '+'를 공백으로 해석하는 문제를 방지
+        var uri = java.net.URI.create(
+                "http://localhost:" + port + "/user/search?phoneNumber=%2B821012345602");
         ResponseEntity<List<Map<String, Object>>> response = rest.exchange(
-                "/user/search?phoneNumber=821012345601", HttpMethod.GET, null,
+                uri, HttpMethod.GET, null,
                 new ParameterizedTypeReference<>() {});
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(1, response.getBody().size(), "phoneNumber=821012345601 는 시드 1명 (admin)");
+        assertEquals(1, response.getBody().size(), "phoneNumber=+821012345602 는 시드 1명 (john)");
     }
 
     @Test
     @Order(30)
     void search_combinedFieldAndAttribute_returnsIntersection() {
-        // admin 은 otpMethod=SKIP → 1명
+        // john 은 otpMethod=SKIP → 1명
         ResponseEntity<List<Map<String, Object>>> response = rest.exchange(
-                "/user/search?username=admin&otpMethod=SKIP", HttpMethod.GET, null,
+                "/user/search?username=john&otpMethod=SKIP", HttpMethod.GET, null,
                 new ParameterizedTypeReference<>() {});
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         List<Map<String, Object>> users = response.getBody();
         assertEquals(1, users.size());
-        assertEquals("admin", users.get(0).get("username"));
+        assertEquals("john", users.get(0).get("username"));
     }
 
     @Test
     @Order(31)
     void count_byAttributeKey_otpMethod_returns17() {
         Long count = rest.getForObject("/user/count?otpMethod=SKIP", Long.class);
-        assertEquals(17L, count, "otpMethod=SKIP 카운트 17명 전원");
+        assertEquals(16L, count, "otpMethod=SKIP 카운트 16명 전원");
     }
 
     @Test
@@ -570,6 +578,172 @@ class UserStorageIntegrationTest {
     }
 
     // =========================================================================
+    // PATCH /user/{id}/attributes/multi
+    // =========================================================================
+
+    @Test
+    @Order(33)
+    @SuppressWarnings("unchecked")
+    void patchMultiAttributes_multipleValues_storedAsIndividualEntries() {
+        String id = createTempUser("multi-test-user-1");
+        try {
+            String body = """
+                    {"roles": ["admin", "developer", "viewer"]}
+                    """;
+
+            ResponseEntity<Void> patchResponse = rest.exchange(
+                    "/user/" + id + "/attributes/multi", HttpMethod.PATCH,
+                    jsonEntity(body), Void.class);
+            assertEquals(HttpStatus.NO_CONTENT, patchResponse.getStatusCode());
+
+            Map<String, Object> user = rest.exchange("/user/" + id, HttpMethod.GET, null,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
+            List<Map<String, String>> multiAttrs = (List<Map<String, String>>) user.get("multiAttributes");
+
+            assertNotNull(multiAttrs);
+            List<String> roles = multiAttrs.stream()
+                    .filter(e -> "roles".equals(e.get("key")))
+                    .map(e -> e.get("value"))
+                    .sorted()
+                    .toList();
+            assertEquals(List.of("admin", "developer", "viewer"), roles, "3개 값이 개별 행으로 저장되어야 함");
+        } finally {
+            rest.delete("/user/" + id);
+        }
+    }
+
+    @Test
+    @Order(34)
+    @SuppressWarnings("unchecked")
+    void patchMultiAttributes_rePatch_replacesOnlyTargetKey() {
+        String id = createTempUser("multi-test-user-2");
+        try {
+            // 초기 세팅: roles 3개 + groups 2개
+            rest.exchange("/user/" + id + "/attributes/multi", HttpMethod.PATCH,
+                    jsonEntity("""
+                            {"roles": ["admin", "developer"], "groups": ["team-a", "team-b"]}
+                            """), Void.class);
+
+            // roles만 교체
+            rest.exchange("/user/" + id + "/attributes/multi", HttpMethod.PATCH,
+                    jsonEntity("""
+                            {"roles": ["viewer"]}
+                            """), Void.class);
+
+            Map<String, Object> user = rest.exchange("/user/" + id, HttpMethod.GET, null,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
+            List<Map<String, String>> multiAttrs = (List<Map<String, String>>) user.get("multiAttributes");
+
+            List<String> roles = multiAttrs.stream()
+                    .filter(e -> "roles".equals(e.get("key")))
+                    .map(e -> e.get("value"))
+                    .toList();
+            List<String> groups = multiAttrs.stream()
+                    .filter(e -> "groups".equals(e.get("key")))
+                    .map(e -> e.get("value"))
+                    .sorted()
+                    .toList();
+
+            assertEquals(List.of("viewer"), roles, "roles는 viewer 하나로 교체되어야 함");
+            assertEquals(List.of("team-a", "team-b"), groups, "미포함 키 groups는 유지되어야 함");
+        } finally {
+            rest.delete("/user/" + id);
+        }
+    }
+
+    @Test
+    @Order(35)
+    @SuppressWarnings("unchecked")
+    void patchMultiAttributes_emptyListRemovesKey() {
+        String id = createTempUser("multi-test-user-3");
+        try {
+            // 초기 세팅
+            rest.exchange("/user/" + id + "/attributes/multi", HttpMethod.PATCH,
+                    jsonEntity("""
+                            {"roles": ["admin", "developer"]}
+                            """), Void.class);
+
+            // 빈 리스트로 삭제
+            rest.exchange("/user/" + id + "/attributes/multi", HttpMethod.PATCH,
+                    jsonEntity("""
+                            {"roles": []}
+                            """), Void.class);
+
+            Map<String, Object> user = rest.exchange("/user/" + id, HttpMethod.GET, null,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
+            List<Map<String, String>> multiAttrs = (List<Map<String, String>>) user.get("multiAttributes");
+
+            boolean hasRoles = multiAttrs.stream().anyMatch(e -> "roles".equals(e.get("key")));
+            assertFalse(hasRoles, "빈 리스트로 PATCH하면 해당 키 전체 삭제되어야 함");
+        } finally {
+            rest.delete("/user/" + id);
+        }
+    }
+
+    @Test
+    @Order(36)
+    @SuppressWarnings("unchecked")
+    void patchMultiAttributes_singleValue_storedCorrectly() {
+        String id = createTempUser("multi-test-user-4");
+        try {
+            rest.exchange("/user/" + id + "/attributes/multi", HttpMethod.PATCH,
+                    jsonEntity("""
+                            {"roles": ["admin"]}
+                            """), Void.class);
+
+            Map<String, Object> user = rest.exchange("/user/" + id, HttpMethod.GET, null,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
+            List<Map<String, String>> multiAttrs = (List<Map<String, String>>) user.get("multiAttributes");
+
+            List<String> roles = multiAttrs.stream()
+                    .filter(e -> "roles".equals(e.get("key")))
+                    .map(e -> e.get("value"))
+                    .toList();
+            assertEquals(List.of("admin"), roles, "값이 1개여도 개별 행으로 저장되어야 함");
+        } finally {
+            rest.delete("/user/" + id);
+        }
+    }
+
+    @Test
+    @Order(37)
+    void patchMultiAttributes_doesNotAffectSingleValueAttributes() {
+        String id = createTempUser("multi-test-user-5");
+        try {
+            // 단일값 attribute 세팅
+            rest.exchange("/user/" + id + "/attributes", HttpMethod.PATCH,
+                    jsonEntity("""
+                            {"department": "engineering"}
+                            """), Void.class);
+
+            // 멀티밸류 PATCH
+            rest.exchange("/user/" + id + "/attributes/multi", HttpMethod.PATCH,
+                    jsonEntity("""
+                            {"roles": ["admin", "developer"]}
+                            """), Void.class);
+
+            @SuppressWarnings("unchecked")
+            Map<String, Object> user = rest.exchange("/user/" + id, HttpMethod.GET, null,
+                    new ParameterizedTypeReference<Map<String, Object>>() {}).getBody();
+
+            @SuppressWarnings("unchecked")
+            Map<String, String> attrs = (Map<String, String>) user.get("attributes");
+            assertEquals("engineering", attrs.get("department"), "멀티밸류 PATCH 후 단일값 attributes 유지되어야 함");
+        } finally {
+            rest.delete("/user/" + id);
+        }
+    }
+
+    @Test
+    @Order(38)
+    void patchMultiAttributes_notFound_returns404() {
+        ResponseEntity<String> response = rest.exchange(
+                "/user/u-notexist0/attributes/multi", HttpMethod.PATCH,
+                jsonEntity("{\"roles\": [\"admin\"]}"), String.class);
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+    // =========================================================================
     // Helpers
     // =========================================================================
 
@@ -579,10 +753,18 @@ class UserStorageIntegrationTest {
         return new HttpEntity<>(json, headers);
     }
 
+    private String createTempUser(String username) {
+        String body = String.format("{\"username\": \"%s\", \"email\": \"%s@kind.internal\"}", username, username);
+        ResponseEntity<Map<String, String>> response = rest.exchange(
+                "/user", HttpMethod.POST, jsonEntity(body),
+                new ParameterizedTypeReference<>() {});
+        return response.getBody().get("id");
+    }
+
     @SuppressWarnings("unchecked")
-    private String getAdminId() {
+    private String getUserId() {
         ResponseEntity<List<Map<String, Object>>> response = rest.exchange(
-                "/user/search?username=admin", HttpMethod.GET, null,
+                "/user/search?username=john", HttpMethod.GET, null,
                 new ParameterizedTypeReference<>() {});
         return (String) response.getBody().get(0).get("id");
     }
