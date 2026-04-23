@@ -1,7 +1,7 @@
 # Makefile for Keycloak User Storage SPI
-IMAGE_ORG := harbor.cnapcloud.com/library
-IMAGE_REPOSITORY := ${IMAGE_ORG}/keycloak-user-storage
-IMAGE_TAG := $(shell git rev-parse --short=7 HEAD)
+IMAGE_ORG ?= harbor.cnapcloud.com/library
+IMAGE_REPOSITORY ?= ${IMAGE_ORG}/keycloak-user-storage
+IMAGE_TAG ?= $(shell git rev-parse --short=7 HEAD)
 
 # Gitops vairables
 GITOPS_REPO := https://github.com/cnapcloud/gitops.git
@@ -23,6 +23,7 @@ docker-build: ## Build the Docker image using BuildKit
 	--local context=. \
 	--local dockerfile=. \
 	--output type=image,name=$(IMAGE_REPOSITORY):$(IMAGE_TAG),push=true
+	clean
 	
 update-tag: ## Update the image tag in GitOps repository
 	@echo "[update-tag] Update the image tag in GitOps repo."
@@ -31,14 +32,15 @@ update-tag: ## Update the image tag in GitOps repository
 	--branch main \
 	--image $(IMAGE_REPOSITORY):$(IMAGE_TAG)
 
-docker-build-multi: ## push docker image with multi-arch support
+# Build and push multi-arch Docker image to Docker Hub
+# make docker-push IMAGE_ORG=cnapcloud IMAGE_TAG=0.0.1
+docker-push: ## push to docker hub
 	export BUILDX_NO_DEFAULT_ATTESTATIONS=1 && \
 	export DOCKER_BUILDKIT=1 && \
 	docker buildx build --platform linux/amd64,linux/arm64 -t $(IMAGE_REPOSITORY):$(IMAGE_TAG) --push .
-	clean
 
 clean: ## Clean up Docker builder cache
 	@echo "[clean] Clean up Docker builder cache."
 	buildctl --addr tcp://buildkitd.cicd.svc:1234 prune --all --force
 
-.PHONY: help build report docker-build-multiarch docker-build docker-push clean
+.PHONY: help build report docker-build-multiarch docker-build docker-build-local docker-push clean
