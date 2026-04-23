@@ -33,7 +33,7 @@ update-tag: ## Update the image tag in GitOps repository
 	--image $(IMAGE_REPOSITORY):$(IMAGE_TAG)
 
 # Build and push multi-arch Docker image to Docker Hub
-# make docker-push IMAGE_ORG=cnapcloud IMAGE_TAG=0.0.1
+# make push IMAGE_ORG=cnapcloud IMAGE_TAG=0.0.1
 push: ## push to docker hub
 	export BUILDX_NO_DEFAULT_ATTESTATIONS=1 && \
 	export DOCKER_BUILDKIT=1 && \
