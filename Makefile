@@ -23,7 +23,7 @@ docker-build: ## Build the Docker image using BuildKit
 	--local context=. \
 	--local dockerfile=. \
 	--output type=image,name=$(IMAGE_REPOSITORY):$(IMAGE_TAG),push=true
-	clean
+	$(MAKE) clean
 	
 update-tag: ## Update the image tag in GitOps repository
 	@echo "[update-tag] Update the image tag in GitOps repo."
