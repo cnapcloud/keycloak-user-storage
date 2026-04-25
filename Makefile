@@ -41,6 +41,6 @@ push: ## push to docker hub
 
 clean: ## Clean up Docker builder cache
 	@echo "[clean] Clean up Docker builder cache."
-	buildctl --addr tcp://buildkitd.cicd.svc:1234 prune --all --force
+	buildctl --addr tcp://buildkitd.cicd.svc:1234 prune --all
 
 .PHONY: help build report docker-build-multiarch docker-build docker-build-local docker-push clean
