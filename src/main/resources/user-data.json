@@ -9,7 +9,7 @@
     "attributes": {
       "dormantStatus": "ACTIVE",
       "phoneNumber": "+821012345602",
-      "otpMethod": "SKIP"
+      "otpMethod": "SMS"
     }
   },
   {
@@ -22,7 +22,7 @@
     "attributes": {
       "dormantStatus": "ACTIVE",
       "phoneNumber": "+821012345603",
-      "otpMethod": "SKIP"
+      "otpMethod": "SMS"
     }
   },
   {
