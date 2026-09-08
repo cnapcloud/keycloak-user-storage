@@ -3,7 +3,7 @@ IMAGE_ORG ?= harbor.cnapcloud.com/library
 IMAGE_REPOSITORY ?= ${IMAGE_ORG}/keycloak-user-storage
 IMAGE_TAG ?= $(shell git rev-parse --short=7 HEAD)
 
-# Gitops vairables
+# Gitops variables
 GITOPS_REPO := https://github.com/cnapcloud/gitops.git
 GITOPS_PATH := tmp/gitops
 GIT_BRANCH ?= $(shell git rev-parse --abbrev-ref HEAD)
