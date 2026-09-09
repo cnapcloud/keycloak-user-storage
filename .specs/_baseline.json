@@ -1,0 +1,47 @@
+{
+  "captured_at": "2026-09-08T07:25:55Z",
+  "git_sha": "4c36ad4",
+  "stack": {
+    "build": "gradle",
+    "java": "17",
+    "spring_boot": "3.3.4",
+    "db": "h2",
+    "migration": "none",
+    "test_framework": "junit-platform",
+    "harness_layers": {
+      "unit": true,
+      "coverage": true,
+      "mutation": false,
+      "checkstyle": false,
+      "spotbugs": false,
+      "archunit": false,
+      "owasp": false,
+      "openapi": false
+    }
+  },
+  "gates": {
+    "unit": {
+      "status": "fail",
+      "tests": 38,
+      "failures": 3,
+      "errors": 0,
+      "skipped": 0
+    },
+    "coverage": {
+      "status": "skipped",
+      "note": "enable reports.xml.required in build.gradle"
+    },
+    "archunit": {
+      "status": "skipped"
+    },
+    "checkstyle": {
+      "status": "skipped"
+    },
+    "spotbugs": {
+      "status": "skipped"
+    },
+    "mutation": {
+      "status": "skipped"
+    }
+  }
+}

@@ -1,22 +1,66 @@
 {
   "permissions": {
     "allow": [
-      "Bash(./gradlew build -x test)",
-      "Bash(curl -s http://localhost:8081/user/count/all)",
       "Bash(./gradlew test)",
       "Bash(./gradlew test --rerun)",
-      "Bash(mvn test -pl . -Dtest=UserRestRepositoryConnectivityTest -q)",
-      "Bash(mvn test -Dtest=UserAdapterIntegrationTest -q)",
-      "Bash(mvn test -Dtest=UserRestRepositoryLookupTest -q)",
-      "Bash(./gradlew build -x test -q)",
-      "Bash(curl -s http://localhost:8081/user/username/emily)",
-      "Bash(mvn test -q)",
-      "Bash(mvn test)",
-      "Bash(./gradlew test -q)"
+      "Bash(./gradlew test -q)",
+      "Bash(./gradlew test --tests *)",
+      "Bash(./gradlew check)",
+      "Bash(./gradlew compileJava)",
+      "Bash(./gradlew compileTestJava)",
+      "Bash(./gradlew jacocoTestReport)",
+      "Bash(.claude/scripts/harness.sh)",
+      "Bash(.claude/scripts/harness.sh *)",
+      "Bash(.claude/scripts/detect-stack.sh)",
+      "Bash(.claude/scripts/detect-stack.sh *)",
+      "Bash(.claude/scripts/check-new-code-coverage.sh)",
+      "Bash(.claude/scripts/check-new-code-coverage.sh *)",
+      "Bash(.claude/scripts/traceability.sh *)",
+      "Bash(curl -s http://localhost:8081/*)",
+      "Bash(git status)",
+      "Bash(git diff *)",
+      "Bash(git log *)",
+      "Bash(git rev-parse *)"
+    ],
+    "deny": [
+      "Bash(./gradlew * -x test*)",
+      "Bash(./gradlew * -x check*)",
+      "Bash(./gradlew * -x pitest*)",
+      "Bash(./gradlew * --exclude-task test*)",
+      "Bash(gradle * -x test*)",
+      "Bash(* -Dpitest.skip*)",
+      "Bash(* -DskipTests*)",
+      "Bash(* --no-verify*)",
+      "Bash(git push *)",
+      "Bash(rm -rf *)"
     ],
     "additionalDirectories": [
-      "/Users/lemon/Devel/apps/keycloak-user-storage/.claude/conventions",
       "/Users/lemon/.claude/projects/-Users-lemon-Devel-apps-keycloak-user-storage"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          { "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/block-impl-without-failing-test.sh" },
+          { "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/enforce-files-in-scope.sh" },
+          { "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/block-progress-on-open-questions.sh" }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/forbid-skip-flags.sh" }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          { "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/route-natural-language-aliases.sh" }
+        ]
+      }
     ]
   }
 }
