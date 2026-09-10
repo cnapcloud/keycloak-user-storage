@@ -22,15 +22,18 @@
 
 ```
 /spec          → 01-spec.md            요구사항 (EARS 형식 AC-NNN + 미확정 Q-NNN)
+                 .specs/README.md       "진행 중 (spec)" 행 추가
 /spec-review   → 02-spec-review.md     스펙 자체 감사, PASS/FAIL
-/plan          → 03-design.md          API 계약 + 레이어 설계 + ADR
+/plan          → 03-design.md          API 계약 + 레이어 설계
                  04-tasks.md           1~4시간짜리 태스크 T-001, T-002 …
+                 adr/ADR-NNN-*.md      대안이 있던 결정마다
                  .tdd-state.json       TDD 상태 머신
 /build T-NNN   → 05-implementation-log.md   태스크별 red→green→refactor→simplify 기록
                  + 실제 코드 + 테스트
 /validate      → 07-validation-report.md    harness 결과 + 기준선 대비 판정
                  07a-traceability.md         AC ↔ 테스트 ↔ 코드 매핑
 /review        → 08-code-review.md      커밋 전 자가 리뷰
+                 .specs/README.md       Approve 시 "완료 이력"으로 이동
 ```
 
 ---
@@ -67,7 +70,8 @@
 > Q-003: 새 USER_ADDRESS 테이블. attributes는 key=value 한 쌍이라 구조적 데이터에 안 맞음.
 > Q-004: 필수 = label, line1, city, postalCode, country. postalCode는 문자열 그대로 저장(검증 안 함). country는 ISO 3166-1 alpha-2.
 
-agent가 답을 `## Resolved Questions`에 기록하고 `Status: resolved`로 바꾼다. 그리고 AC를 확정한다:
+agent가 답을 `## Resolved Questions`로 옮기고(그 항목은 `## Open Questions`에서 사라진다) AC를 확정한다.
+동시에 `.specs/README.md` "진행 중 / 예정" 표에 이 feature 행을 `진행 중 (spec)`으로 추가한다.
 
 ```
 - AC-001: When 클라이언트가 존재하는 사용자 id로 POST /user/{id}/addresses 를 유효한 본문과 함께 호출하면,
@@ -120,6 +124,10 @@ ADR-001: 새 테이블 vs attributes 맵 → 새 테이블 (구조적 데이터,
 
 **당신이 하는 것** — 설계와 태스크 분해를 검토. 이상하면 지적, 괜찮으면 승인.
 
+> `/plan`을 두 번째로 부르는 경우는 `03-design.md`/`04-tasks.md` 유무와 `07-validation-report.md`
+> 상태로 모드가 갈린다: 산출물 없음 → 신규 설계 / `/validate` FAIL + `Gap-NNN` → gap re-plan(추가만) /
+> 그 외(build 진행 중 등) → 거부. build 도중엔 `/plan`을 다시 부르지 않는다.
+
 ### 4. `/build T-001` (태스크마다 반복)
 
 `git status`가 깨끗해야 시작된다(이전 태스크 커밋 필수). 그다음 4단계가 강제된다:
@@ -147,7 +155,7 @@ T-002 → 커밋 → T-003 → 커밋 → T-004 → 커밋.
 
 ```
 07-validation-report.md:
-  unit:     pass (신규 12 테스트 통과, 기준선 실패 3건은 변동 없음 → 회귀 아님)
+  unit:     pass (신규 12 테스트 통과, 기준선 대비 회귀 0)
   coverage: 신규 라인 96% (기준 95%) → pass
   verdict:  PASS
 
@@ -156,13 +164,16 @@ T-002 → 커밋 → T-003 → 커밋 → T-004 → 커밋.
   AC-006 → T-004 → ...
 ```
 
-기준선(`.specs/_baseline.json`)의 선행 실패 3건은 통과시키고, **새로 생긴 실패만** 막는다.
-FAIL이면 원인 태스크로 돌아가 `/build`로 고친다.
+`/validate`는 `.specs/_baseline.json` 대비 **회귀만** 막는다 — baseline에 이미 있던 실패는 통과시키고
+**새로 생긴 실패만** FAIL. FAIL이면 원인 태스크로 돌아가 `/build`로 고친다.
+(baseline 자체에 실패 게이트가 있는 경우는 아래 "baseline에 실패가 있으면" 참조.)
 
 ### 6. `/review`
 
-diff를 루브릭 9개 항목(레이어 경계, 에러 포맷, 로깅, attributes null, 이모지 없음 등)으로 대조 → `08-code-review.md`.
-지적사항 있으면 고치고 다시.
+diff를 루브릭 9개 항목(1 추적성 · 2 레이어 경계 · 3 Spring 관용 · 4 에러 처리 · 5 데이터 접근 ·
+6 날짜/직렬화 · 7 테스트 품질 · 8 명료성 · 9 마이그레이션/계약)으로 대조 → `08-code-review.md`.
+`must-fix` 있으면 고치고 `/validate`부터 다시. `Approve`면 `.specs/README.md`의 이 feature 행을
+자동으로 "완료 이력"으로 옮긴다.
 
 ### 7. 커밋 / PR
 
@@ -173,7 +184,27 @@ git push -u origin feature/user-address
 gh pr create
 ```
 
-`.specs/README.md`의 "진행 중" 행을 "완료 이력"으로 옮긴다.
+`.specs/README.md`의 완료 처리는 `/review` Approve가 이미 했다 — PR만 올리면 된다.
+(선행 실패를 고치는 feature였다면 **머지 가능 상태에서 `harness.sh --baseline` 재실행** —
+아래 "baseline에 실패가 있으면".)
+
+---
+
+## baseline에 실패가 있으면
+
+`_onboarding.md`에 캡처된 선행 실패(예: `unit: fail`)는 방치하면 게이트가 느슨한 채 남는다.
+그 상태로는 fix 이후 누가 테스트를 깨도 `/validate`가 "baseline보다 나쁘지 않음"으로 통과시킨다.
+
+해소 절차:
+
+1. 그 실패를 하나의 feature로 잡는다 — `.specs/README.md`에 행 추가 → `/spec "<실패 설명>"`.
+2. 정규 라이프사이클 완주 (`/spec-review → /plan → /build → /validate → /review`).
+3. 머지 가능 상태가 되면 **`.claude/scripts/harness.sh --baseline`** 재실행 → `_baseline.json`을
+   새 결과로 다시 캡처 (**ratchet down**: 허용 실패 수가 줄고 이후 되돌릴 수 없음).
+   feature 커밋과 **분리된 커밋**으로.
+4. `_onboarding.md`의 "선행 실패" / "기준선 게이트" 표도 손으로 최신화한다.
+
+상세·재캡처를 안 할 때의 문제 전체: `.claude/docs/methodology.md` → "브라운필드 기준선 (`_baseline.json`) 관리".
 
 ---
 
@@ -181,7 +212,7 @@ gh pr create
 
 | 증상 | 원인 | 해결 |
 |---|---|---|
-| `BLOCKED: unresolved Open Questions` | `01-spec.md`에 `Status: open`인 `Q-NNN` 남음 | 답을 받아 `Status: resolved`로 바꾼다 |
+| `BLOCKED: unresolved Open Questions` | `01/03/04` 문서의 `## Open Questions` 섹션에 `Q-NNN`이 남음 (`Status: open` 또는 Status 줄 없음) | 답을 받아 그 항목을 `## Resolved Questions`로 옮긴다 (또는 근거와 함께 `Status: deferred`) |
 | `BLOCKED: no .tdd-state.json` | `/plan` 안 하고 `/build` 시도 | `/plan` 먼저 |
 | `BLOCKED: phase is 'pending'` / `red_failure_excerpt is empty` | 실패 테스트 없이 `src/main` 편집 | red 단계부터. 실패하는 테스트 먼저 쓰고 실행 |
 | `BLOCKED: not in files_in_scope` | 태스크 범위 밖 파일 편집 | `04-tasks.md` + `.tdd-state.json`의 `files_in_scope` 넓히고 `/plan` 재실행, 아니면 별도 태스크로 |
@@ -192,7 +223,13 @@ gh pr create
 
 ## 참조
 
+- **방법론 상세**: `.claude/docs/methodology.md`
+  - 7단계 + Phase 0, command↔agent 분리, hook 강제 장치 표
+  - `.tdd-state.json` 상태 머신 (`pending → red → green → refactor → simplify → done`)
+  - **"브라운필드 기준선 (`_baseline.json`) 관리"** — baseline 실패 게이트 해소 · ratchet down · 재캡처 안 할 때의 문제
+  - 이 프로젝트 고유 규칙 (`ResponseEntity` 허용, 에러 봉투, `attributes` null 금지, `LocalDateTime`, Criteria API, 이모지 금지)
 - 워크플로우 진입점·hook 목록: `.claude/README.md`
-- 방법론 상세: `.claude/docs/methodology.md`
-- 명령 진입점: `.claude/commands/<name>.md` (얇음) — 절차·거부조건·완료조건은 `.claude/agents/<name>.md`
+- harness 동작·레이어·게이트 추가: `.claude/docs/harness-gradle.md`
+- 명령 진입점: `.claude/commands/<name>.md` (얇음, frontmatter `agent:`/`hat:` + I/O 계약) — 절차·거부조건·완료조건은 `.claude/agents/<name>.md`
+- skill(코딩 컨벤션·EARS·traceability 등): `.claude/skills/<name>/SKILL.md` — 각 command가 자동 로드
 - 현재 기능 현황: `.specs/README.md` · `/status`
