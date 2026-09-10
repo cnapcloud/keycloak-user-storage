@@ -28,6 +28,21 @@ The layers, in run order:
 A layer whose plugin is not in `build.gradle` is reported as `"skipped"`, which is
 **not a failure** — `/validate` enforces only the configured layers.
 
+### Verdict
+
+`/validate` reads the per-gate `status` from `build/harness-summary.json` (not the
+gradle exit code) and compares each against `.specs/_baseline.json`:
+
+| condition | verdict |
+|---|---|
+| every active gate `pass`, no regression vs baseline | PASS |
+| gates pass but below an absolute target, no regression, waivers cite an ADR | WARN |
+| any active gate `fail`, a regression vs baseline, or an AC with no test | FAIL |
+
+`skipped` is neither pass nor fail. A regression = that gate worse than the baseline
+value, so baseline failures pass through until `--baseline` is re-run to ratchet them
+out. Full rules: `.claude/skills/harness-report-parsing/SKILL.md`.
+
 ---
 
 ## Adding a layer
