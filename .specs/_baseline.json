@@ -1,6 +1,6 @@
 {
-  "captured_at": "2026-09-10T11:17:22Z",
-  "git_sha": "462df66",
+  "captured_at": "2026-09-10T14:20:54Z",
+  "git_sha": "bbf7c8d",
   "stack": {
     "build": "gradle",
     "java": "17",
@@ -21,9 +21,9 @@
   },
   "gates": {
     "unit": {
-      "status": "fail",
-      "tests": 38,
-      "failures": 3,
+      "status": "pass",
+      "tests": 39,
+      "failures": 0,
       "errors": 0,
       "skipped": 0
     },
