@@ -65,6 +65,23 @@ UI/프론트엔드 영역은 제외.
 `/onboard`가 캡처한 `_baseline.json`은 `/validate`의 **허용 바닥**이다. `/validate`는 이 파일 대비
 **회귀만** 차단한다 — baseline이 `unit: fail (3)`이면 실패 3건까지는 통과 (신규/변경 라인은 항상 풀 기준).
 
+### `/validate` 최종 판정
+
+`/validate`는 콘솔 출력이 아니라 **`build/harness-summary.json`**(harness가 리포트를 파싱해 만든
+게이트별 `status`)을 읽고, 각 게이트를 `_baseline.json`의 기록값과 대조한다.
+gradle exit code(`build_exit`)는 기록만 되고 판정에 쓰이지 않는다.
+
+| 조건 | verdict |
+|---|---|
+| 모든 활성 게이트 `pass` + baseline 대비 회귀 없음 | **PASS** |
+| 활성 게이트는 pass지만 절대 목표(예: 커버리지 90%) 미달 + 회귀 없음 + 모든 waiver가 ADR 참조 | **WARN** |
+| 활성 게이트 중 `fail` 하나라도 · baseline 대비 회귀 · 테스트 0개 AC | **FAIL** |
+
+- `skipped`(플러그인 미배선) = pass도 fail도 아님. `_stack.json`이 active로 표시했는데 리포트 없음 = **error**.
+- "회귀" = 그 게이트가 `_baseline.json`의 값보다 나빠짐 (unit 실패 수 증가, 커버리지 하락 등).
+- 그래서 baseline을 안 조이면 (아래 "재캡처를 안 하면") 새 실패도 "회귀 아님"으로 흡수된다.
+- 상세 규칙: `.claude/skills/harness-report-parsing/SKILL.md`.
+
 ### baseline에 실패 게이트가 있을 때
 
 `_onboarding.md`에 캡처된 선행 실패(예: `unit: fail`)는 방치하지 않고 **정식 feature로** 해소한다:
