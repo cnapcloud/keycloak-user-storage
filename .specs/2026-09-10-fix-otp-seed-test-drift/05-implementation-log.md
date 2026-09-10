@@ -57,3 +57,50 @@ baseline `unit` 실패 3 → 1 (T-001이 2건 해소, 회귀 0).
 
 ### done
 T-001 `acs_covered` = AC-001·AC-002·AC-005·AC-007 전부 `@Tag` 테스트로 커버. `phase: done`.
+
+---
+
+## T-002 — `otpMethod=SMS` 단언 + 필드·속성 교집합 정합
+
+acs_covered: AC-003, AC-004, AC-006
+files_in_scope: `src/test/java/com/keycloak/userstorage/UserStorageIntegrationTest.java`
+
+### red (2026-09-10)
+```
+./gradlew test --tests '...UserStorageIntegrationTest.search_combinedFieldAndAttribute_returnsIntersection'
+
+> search_combinedFieldAndAttribute_returnsIntersection() FAILED
+    org.opentest4j.AssertionFailedError: expected: <1> but was: <0>
+        at UserStorageIntegrationTest.java:560
+```
+원인: 질의 `?username=john&otpMethod=SKIP` — `john`의 시드 `otpMethod`는 `SMS`이므로 교집합 0.
+
+### green (2026-09-10)
+`UserStorageIntegrationTest.java`:
+
+- `search_combinedFieldAndAttribute_returnsIntersection`: 질의 `otpMethod=SKIP` → `SMS`,
+  주석 "john 은 otpMethod=SKIP → 1명" → "john 은 otpMethod=SMS → 1명 (필드+속성 교집합)".
+  `@Tag("AC-004")` `@Tag("AC-006")` (AC-006 = 이 테스트 통과로 baseline 마지막 실패가 닫힘).
+- 신규 `search_byAttributeKey_otpMethod_sms_returnsJohnAndJane` (characterization — 프로덕션 이미 정확):
+  `?otpMethod=SMS` → size 2, username 정렬 `["jane","john"]`. `@Tag("AC-003")` `@Tag("AC-005")`.
+  순수 읽기라 `@Order` 생략.
+
+```
+./gradlew test --tests '...search_combinedFieldAndAttribute_returnsIntersection' \
+               --tests '...search_byAttributeKey_otpMethod_sms_returnsJohnAndJane'
+  > both PASSED
+
+./gradlew clean test
+  > tests=39 failures=0 errors=0 skipped=0 — BUILD SUCCESSFUL
+```
+baseline `unit` 실패 3 → **0**. 테스트 수 38 → 39 (SMS characterization 1건 추가).
+
+### refactor (2026-09-10)
+해당 없음 — 질의 문자열·주석 수정 + 신규 단언 테스트뿐. 중복/레이어 이동 없음.
+
+### simplify (2026-09-10)
+해당 없음. 신규 테스트는 `stream().map().sorted().toList()` + `assertEquals(List.of(...))`로 이미 최소.
+
+### done
+T-002 `acs_covered` = AC-003·AC-004·AC-006 전부 `@Tag` 테스트로 커버. traceability 7/7 covered. `phase: done`.
+`04-tasks.md` 전 태스크 done → 다음 `/validate`.

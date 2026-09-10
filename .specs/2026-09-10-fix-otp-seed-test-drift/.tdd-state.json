@@ -14,12 +14,15 @@
       "done_at": "2026-09-10T11:45:00Z"
     },
     "T-002": {
-      "phase": "pending",
+      "phase": "done",
       "acs_covered": ["AC-003", "AC-004", "AC-006"],
       "files_in_scope": [
         "src/test/java/com/keycloak/userstorage/UserStorageIntegrationTest.java"
       ],
-      "depends_on": ["T-001"]
+      "depends_on": ["T-001"],
+      "red_at": "2026-09-10T11:50:00Z",
+      "red_failure_excerpt": "search_combinedFieldAndAttribute_returnsIntersection (L560): AssertionFailedError expected: <1> but was: <0> (query ?username=john&otpMethod=SKIP; john's seed otpMethod is now SMS)",
+      "done_at": "2026-09-10T11:55:00Z"
     }
   }
 }

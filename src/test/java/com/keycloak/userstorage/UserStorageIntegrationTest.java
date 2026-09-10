@@ -532,6 +532,22 @@ class UserStorageIntegrationTest {
         assertEquals(14, response.getBody().size(), "otpMethod=SKIP 시드 사용자 14명 (john·jane은 SMS)");
     }
 
+    // 순수 읽기 단언이라 실행 순서 무관 — @Order 생략 (기본 위치에서 실행)
+    @Test
+    @Tag("AC-003")
+    @Tag("AC-005")
+    void search_byAttributeKey_otpMethod_sms_returnsJohnAndJane() {
+        ResponseEntity<List<Map<String, Object>>> response = rest.exchange(
+                "/user/search?otpMethod=SMS", HttpMethod.GET, null,
+                new ParameterizedTypeReference<>() {});
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        List<Map<String, Object>> users = response.getBody();
+        assertEquals(2, users.size(), "otpMethod=SMS 시드 사용자 2명");
+        List<String> usernames = users.stream().map(u -> (String) u.get("username")).sorted().toList();
+        assertEquals(List.of("jane", "john"), usernames);
+    }
+
     @Test
     @Order(29)
     void search_byAttributeKey_phoneNumber_returnsUser() {
@@ -549,10 +565,12 @@ class UserStorageIntegrationTest {
 
     @Test
     @Order(30)
+    @Tag("AC-004")
+    @Tag("AC-006")
     void search_combinedFieldAndAttribute_returnsIntersection() {
-        // john 은 otpMethod=SKIP → 1명
+        // john 은 otpMethod=SMS → 1명 (필드 username + 속성 otpMethod 교집합)
         ResponseEntity<List<Map<String, Object>>> response = rest.exchange(
-                "/user/search?username=john&otpMethod=SKIP", HttpMethod.GET, null,
+                "/user/search?username=john&otpMethod=SMS", HttpMethod.GET, null,
                 new ParameterizedTypeReference<>() {});
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -560,6 +578,7 @@ class UserStorageIntegrationTest {
         assertEquals(1, users.size());
         assertEquals("john", users.get(0).get("username"));
     }
+
 
     @Test
     @Order(31)
