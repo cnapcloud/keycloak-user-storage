@@ -2,23 +2,21 @@
 description: Read-only — show where every feature under .specs/ stands. See .claude/commands/status.md.
 argument-hint: "[feature-id]"
 ---
-# /status
-
-**Phase:** meta — read-only
-**Owning agent:** none (pure reporting)
+# /status — meta (read-only)
 
 ## Purpose
-Show the user where every active feature stands. No writes, no side effects.
+활성 기능 각각이 파이프라인 어디에 있는지 한 표로 보여준다. 순수 리포팅 —
+쓰기도 부작용도 없고 owning agent도 없다.
 
 ## Inputs
-- Optional `<feature-id>`; without it, summarise all features under `.specs/`.
+- `[feature-id]` — 선택. 없으면 `.specs/` 아래 전체를 요약한다.
+
+## Outputs
+- 없음 — 표 + 권장 다음 커맨드 한 줄을 출력만 한다
 
 ## Reads
 - `.specs/*/01-spec.md`, `02-spec-review.md`, `03-design.md`, `04-tasks.md`, `.tdd-state.json`, `07-validation-report.md`
 - `build/harness-summary.json` if present
-
-## Writes
-Nothing.
 
 ## Process
 One row per feature:

@@ -2,26 +2,30 @@
 description: Phase 4 — 태스크 하나를 red → green → refactor → simplify로. TDD 강제.
 argument-hint: "<task-id>  (예: T-001)"
 ---
-# /build
-
-<!--
-  frontmatter에 agent를 두지 않는다. 이 커맨드는 두 agent를 분기·루프로 지휘하는데,
-  서브에이전트는 다른 서브에이전트를 스폰할 수 없으므로(중첩 불가) 단일 agent에 위임할 수 없다.
-  따라서 메인 세션이 이 파일의 ## Orchestration을 직접 실행하며,
-  red는 test-engineer, green/refactor/simplify는 implementer 서브에이전트에 순차 위임한다.
-  가벼운 지휘 로직(git 체크, .tdd-state.json 전이, 루프, STOP)만 메인 세션에 남고,
-  무거운 작업(테스트/코드 작성)은 각 콜드 서브에이전트 안에 격리된다.
--->
-
-**Phase 4.** 오케스트레이션 커맨드. **메인 세션**이 아래 순서를 실행하며 두 agent를 순차 위임한다:
-`.claude/agents/test-engineer.md` (red) → `.claude/agents/implementer.md` (green/refactor/simplify).
-각 단계의 상세 절차 · 거부조건 · 완료조건 · 참조 skill은 각 agent 파일에 있다.
+# /build — Phase 4
 
 ## Purpose
-태스크 하나를 4개 TDD phase로 끝까지 실행하고, phase마다 `.tdd-state.json`을 전이시키고 `05-implementation-log.md`에 블록을 추가한다.
+태스크 하나를 red → green → refactor → simplify 네 phase로 완주시킨다. phase마다
+`.tdd-state.json`을 전이시키고 `05-implementation-log.md`에 블록을 덧붙인다.
+TDD 순서는 hook으로 강제된다 (실패 테스트 없이 `src/main/**` 편집 불가).
 
 ## Inputs
-- `<task-id>` (예: `T-001`). 필수.
+- `<task-id>` (예: `T-001`) — 필수
+
+## Outputs
+- 프로덕션 코드 + 테스트
+- `.specs/<id>/05-implementation-log.md` — phase별 블록 (red / green / refactor / simplify)
+- `.tdd-state.json` — `active_task` · `phase` 전이 (커밋은 하지 않음)
+
+## Next
+태스크가 끝나면 사용자가 `git commit`한 뒤 `/build <다음 T-NNN>`. `04-tasks.md`의
+모든 태스크가 `done`이면 `/validate`로 넘어간다. 자동 커밋 · 다음 태스크 자동 시작은 하지 않는다.
+
+<!--
+  frontmatter에 agent 없음: 두 agent를 분기·루프로 지휘하므로 단일 위임 불가
+  (서브에이전트는 서브에이전트를 못 스폰). 메인 세션이 아래 ## Orchestration을 직접 실행 —
+  red는 test-engineer, green/refactor/simplify는 implementer 서브에이전트. 각 단계 상세는 그 agent 파일.
+-->
 
 ## Orchestration
 0. **Pre-flight.** `git status`. 이전 태스크의 미커밋 변경이 있으면 거부 — `git commit → /build <task-id>` 안내.

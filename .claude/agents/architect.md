@@ -14,7 +14,7 @@ model: sonnet
 
 **Hat 선택:** 태스크 프롬프트에 `(onboarding hat)` / `(design hat)` 리터럴이 있으면 그것을 따른다. 없으면 `## When invoked`의 커맨드명↔hat 매핑으로 결정한다. 둘 다 불명확하면 사용자에게 묻는다.
 
-절차 · 거부조건 · 완료조건은 전부 이 파일에 있다. 커맨드 없이 직접 호출돼도 동작한다.
+절차 · 거부조건 · 완료조건 · `<feature-id>` 해석은 전부 이 파일에 있다. `입출력 계약`(Purpose/Inputs/Outputs)은 `commands/onboard.md` · `commands/plan.md`. 커맨드 없이 직접 호출돼도 동작한다.
 
 ## When invoked
 - `/onboard` — onboarding hat
