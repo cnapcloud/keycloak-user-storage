@@ -13,15 +13,7 @@
 - New rule(s) to add to `ArchitectureTest.java`: <…> (see `archunit-rules` skill)
 
 ## API Contract (OpenAPI sketch)
-For every new/changed endpoint:
-```json
-{
-  "endpoint": "<METHOD /path>",
-  "request":  { "example": { } },
-  "success_response": { "status": <2xx>, "body": { } },
-  "error_response":   { "status": <4xx>, "example": { "error": "..." } }
-}
-```
+- 신규/변경 엔드포인트마다 request + success + error 예시와 상태코드 (see `openapi-contract-first` skill).
 
 ## Data model
 - Entities touched: `User` / `USER_ATTRIBUTES` / `CredentialData` — <changes>

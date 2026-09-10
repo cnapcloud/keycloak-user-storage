@@ -1,7 +1,6 @@
 # keycloak-user-storage
 
 Keycloak User Storage Provider가 사용자 인증 시 호출하는 REST API 백엔드. Spring Boot 3.3.4 + H2 in-memory + JPA.
-USP 규격: `keycloak-extension-spi/docs/06-usp-integration-guide.md`
 
 ---
 
