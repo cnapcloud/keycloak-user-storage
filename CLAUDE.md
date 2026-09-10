@@ -10,7 +10,7 @@ USP 규격: `keycloak-extension-spi/docs/06-usp-integration-guide.md`
 모든 기능 작업은 spec-driven harness를 거친다. 새 기능은 `/spec`부터 시작한다.
 
 ```
-/onboard → /spec → /spec-review → /plan → /build T-NNN → /validate → /review → (사람이) commit
+/onboard → /spec → /spec-review → /plan → (/build T-NNN → 커밋) ×N → /validate → /review → 커밋   # 커밋은 사람이
 ```
 
 - 워크플로우 진입점 · 강제 hook 목록: [`.claude/README.md`](.claude/README.md)

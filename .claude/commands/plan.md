@@ -2,6 +2,7 @@
 description: Phase 3 — PASS 스펙을 03-design.md + 04-tasks.md + ADR + .tdd-state.json으로.
 argument-hint: "[feature-id]"
 agent: architect
+hat: design
 ---
 # /plan — Phase 3
 
@@ -24,4 +25,5 @@ agent: architect
 전체 재설계 대신 `Gap-NNN`을 덮는 gap task만 `04-tasks.md`에 추가한다.
 
 ---
-절차 · 거부조건 · 완료조건 · 참조 skill은 `.claude/agents/architect.md` (design hat)에 있다.
+이 커맨드는 `architect`를 **design hat**으로 실행한다. 절차 · 거부조건 · 완료조건 ·
+참조 skill은 `.claude/agents/architect.md`에 있다.

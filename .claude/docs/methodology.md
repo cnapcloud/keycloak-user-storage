@@ -20,8 +20,8 @@ UI/프론트엔드 영역은 제외.
 ## 7단계 (+ Phase 0)
 
 ```
-/onboard → /spec → /spec-review → /plan → /build T-NNN → /validate → /review → commit
-  (0)       (1)        (2)          (3)     (4, TDD 반복)     (5)         (6)
+/onboard → /spec → /spec-review → /plan → (/build T-NNN → commit) ×N → /validate → /review → commit
+  (0)       (1)        (2)          (3)     (4, 태스크마다 TDD + 커밋)      (5)         (6)
 ```
 
 | Phase | Command | Owner agent | 산출물 |
@@ -36,7 +36,7 @@ UI/프론트엔드 영역은 제외.
 
 (`06-test-plan.md`은 이 lean 편성에서 생략 — 번호는 호환을 위해 비워둠. 커버리지/traceability 갭은 별도 문서 없이 처리한다: `/validate`가 `07-validation-report.md`에 `Gap-NNN`으로 식별 → `/plan`이 이를 덮는 gap task를 `04-tasks.md`에 추가 → `/build`가 정규 red→green 루프로 닫는다. 대응 AC가 없는 orphan 라인은 `Q-NNN`으로 스펙에 반송.)
 
-**command와 agent의 분리.** `commands/*.md`는 얇다 — frontmatter(`agent:`) + `## Purpose / Inputs / Outputs / Next` 섹션 + owning agent 포인터만.
+**command와 agent의 분리.** `commands/*.md`는 얇다 — frontmatter(`agent:` + 두 hat agent는 `hat:`) + `## Purpose / Inputs / Outputs / Next` 섹션 + owning agent 포인터만.
 절차 · 거부조건 · 완료조건 · `<feature-id>` 생략 시 해석은 owning agent(`agents/*.md`)에 있고, agent는 커맨드 없이 직접 호출돼도 자립 실행된다.
 `spec-author` · `architect` · `validator`는 각각 두 hat을 담고 커맨드가 hat을 지정한다.
 `/build`만 예외 — 두 agent를 지휘하므로 메인 세션이 오케스트레이션하고 `commands/build.md`가 그 순서를 담는다.

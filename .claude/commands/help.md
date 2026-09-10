@@ -34,7 +34,7 @@ No argument → print this table and the natural-language alias list:
 | `/status` | meta | pipeline table (read-only) |
 | `/help` | meta | this catalog |
 
-Order: `/onboard → /spec → /spec-review → /plan → /build T-001 … → /validate → /review → commit`.
+Order: `/onboard → /spec → /spec-review → /plan → (/build T-NNN → commit) ×N → /validate → /review → commit`.
 
 With an argument → print that command's **Purpose / Inputs / Outputs / Next** sections, then its owning agent's Process / Refuse if / Done when / Hard rules / Handoff from `.claude/agents/<name>.md` (the thin command file points there; `/status` and `/help` have no agent).
 

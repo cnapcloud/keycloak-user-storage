@@ -2,6 +2,7 @@
 description: Phase 1 — 요청이나 백로그 항목을 EARS-lite 01-spec.md로 변환.
 argument-hint: "<free text> | <feature-id> | .specs/README.md row"
 agent: spec-author
+hat: author
 ---
 # /spec — Phase 1
 
@@ -15,9 +16,11 @@ agent: spec-author
 
 ## Outputs
 - `.specs/<id>/01-spec.md` — `AC-NNN` 인수 조건 목록 (EARS-lite) + 미해결 항목은 `## Open Questions`의 `Q-NNN`
+- `.specs/README.md` — "진행 중 / 예정 기능" 표에 이 feature 행을 `진행 중 (spec)`으로 추가/갱신
 
 ## Next
 `Q-NNN`에 답을 채운 뒤 `/spec-review`로 넘어간다.
 
 ---
-절차 · 거부조건 · 완료조건 · 참조 skill은 `.claude/agents/spec-author.md` (author hat)에 있다.
+이 커맨드는 `spec-author`를 **author hat**으로 실행한다. 절차 · 거부조건 · 완료조건 ·
+참조 skill은 `.claude/agents/spec-author.md`에 있다.

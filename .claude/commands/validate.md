@@ -2,6 +2,7 @@
 description: Phase 5 — harness 실행, 리포트 파싱, 07-validation-report.md + 07a-traceability.md에 verdict 하나 산출.
 argument-hint: "[feature-id]"
 agent: validator
+hat: validate
 ---
 # /validate — Phase 5
 
@@ -24,4 +25,5 @@ gap task를 `04-tasks.md`에 추가한 뒤 `/build`로 닫는다. 복구는 사�
 validator 자신은 테스트/코드를 고치지 않는다.
 
 ---
-절차 · 거부조건 · 완료조건 · 참조 skill은 `.claude/agents/validator.md` (validate hat)에 있다.
+이 커맨드는 `validator`를 **validate hat**으로 실행한다. 절차 · 거부조건 · 완료조건 ·
+참조 skill은 `.claude/agents/validator.md`에 있다.

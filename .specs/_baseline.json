@@ -1,6 +1,6 @@
 {
-  "captured_at": "2026-09-08T07:25:55Z",
-  "git_sha": "4c36ad4",
+  "captured_at": "2026-09-10T11:17:22Z",
+  "git_sha": "462df66",
   "stack": {
     "build": "gradle",
     "java": "17",

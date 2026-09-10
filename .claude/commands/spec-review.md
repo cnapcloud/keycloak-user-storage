@@ -2,6 +2,7 @@
 description: Phase 2 — 01-spec.md를 체크리스트에 대조, PASS/FAIL verdict로 02-spec-review.md 산출.
 argument-hint: "[feature-id]"
 agent: spec-author
+hat: review
 ---
 # /spec-review — Phase 2
 
@@ -21,4 +22,5 @@ agent: spec-author
 (사용자 에스컬레이션 전 최대 3회 반복).
 
 ---
-절차 · 거부조건 · 완료조건 · 참조 skill은 `.claude/agents/spec-author.md` (review hat)에 있다.
+이 커맨드는 `spec-author`를 **review hat**으로 실행한다. 절차 · 거부조건 · 완료조건 ·
+참조 skill은 `.claude/agents/spec-author.md`에 있다.

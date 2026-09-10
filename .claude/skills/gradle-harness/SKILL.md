@@ -32,4 +32,4 @@ description: How .claude/scripts/harness.sh maps the spec-driven "10-layer harne
 - new code → must meet the absolute target (`check-new-code-coverage.sh`, ≥95%) regardless of baseline
 
 ## Wiring the scaffolded layers
-Do **not** hand-edit `build.gradle` ad hoc. `.claude/docs/harness-gradle.md` holds the full patch; wire it through its own `.specs/<date>-wire-gradle-harness/` feature so the change itself goes through the workflow. Internal repo `reposilite.kind.internal` may not mirror every plugin — verify resolution first.
+`.claude/docs/harness-gradle.md` holds a self-contained patch per layer. Apply one when it's needed, then re-run `harness.sh --baseline` so `.specs/_stack.json` and `.specs/_baseline.json` pick up the new gate. Plugins resolve from the Gradle Plugin Portal, dependencies from Maven Central — not the internal `reposilite.kind.internal` mirror; just confirm the build host can reach them.

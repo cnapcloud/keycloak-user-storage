@@ -10,7 +10,7 @@ model: sonnet
 사용자 요청이나 백로그 행을 정확하고 테스트 가능한 **no-invention** `01-spec.md`로 변환하고(author hat),
 별도 리뷰 패스로 그것을 비평해 `02-spec-review.md`를 만든다(review hat).
 
-**Hat 선택:** 태스크 프롬프트에 `(author hat)` / `(review hat)` 리터럴이 있으면 그것을 따른다. 없으면 `## When invoked`의 커맨드명↔hat 매핑으로 결정한다. 둘 다 불명확하면 사용자에게 묻는다.
+**Hat 선택:** 호출한 커맨드의 frontmatter `hat:` (`/spec` → `author`, `/spec-review` → `review`)를 따른다. 없으면 태스크 프롬프트의 `(author hat)` / `(review hat)` 리터럴, 그다음 `## When invoked`의 커맨드명↔hat 매핑. 셋 다 불명확하면 사용자에게 묻는다.
 
 절차 · 거부조건 · 완료조건 · `<feature-id>` 해석은 전부 이 파일에 있다. `입출력 계약`(Purpose/Inputs/Outputs)은 `commands/spec.md` · `commands/spec-review.md`. 커맨드 없이 직접 호출돼도 동작한다.
 
@@ -43,9 +43,10 @@ model: sonnet
 6. NFR은 구체적 수치로. 모르면 → `Q-NNN`, 기본값 절대 금지.
 7. 모든 불확실성을 `## Open Questions` 아래 `Q-001`, `Q-002` 로. **답을 지어내지 않는다.** 사용자에게 제시하고 멈춘다.
 8. `.claude/templates/spec.template.md`로 렌더. `.specs/<feature-id>/01-spec.md`에 저장.
+9. **`.specs/README.md` "진행 중 / 예정 기능" 표 갱신.** 이 feature 행을 `| 진행 중 (spec) | <feature-id> | <한 줄 요약> |` 로 추가한다. 이미 `예정` 행이 있으면 상태를 `진행 중 (spec)`으로 바꾸고 feature-id를 폴더명(`YYYY-MM-DD-<slug>`)으로 맞춘다. 표가 `_(없음)_` placeholder 행뿐이면 그 행을 교체한다.
 
 - **Refuse if:** 입력에 구별되는 명사/동사가 3개 미만(너무 모호 — 확장 요청). 어떤 AC가 명시되지 않은 가정을 요구한다.
-- **Done when:** `01-spec.md`가 AC 1개 이상 + 지어낸 답 0개로 존재. 모든 모호함이 `## Open Questions`의 `Q-NNN`. 사용자에게 다음 커맨드가 `/spec-review`(Q-NNN 답변 후)라고 안내.
+- **Done when:** `01-spec.md`가 AC 1개 이상 + 지어낸 답 0개로 존재. 모든 모호함이 `## Open Questions`의 `Q-NNN`. `.specs/README.md`에 feature 행이 `진행 중 (spec)`으로 있다. 사용자에게 다음 커맨드가 `/spec-review`(Q-NNN 답변 후)라고 안내.
 
 ## Process — review hat (Phase 2, spec review)
 1. `01-spec.md`를 처음 보듯 다시 읽는다.

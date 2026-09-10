@@ -2,6 +2,7 @@
 description: Phase 0 — repo 분류, harness baseline 캡처, .specs/_onboarding.md 작성.
 argument-hint: "[optional: subdir path]"
 agent: architect
+hat: onboarding
 ---
 # /onboard — Phase 0
 
@@ -16,10 +17,11 @@ agent: architect
 ## Outputs
 - `.specs/_stack.json` — 스택 분류 + 활성 harness 레이어
 - `.specs/_baseline.json` — 게이트 기준선 (이후 이보다 나빠지면 FAIL)
-- `.specs/_onboarding.md` — 분류 결과 + baseline 표 + 미배선 레이어 + 권장 첫 `/spec`
+- `.specs/_onboarding.md` — 분류 결과 + baseline 표 + 미설정 레이어 + 권장 첫 `/spec`
 
 ## Next
 repo당 한 번만 실행한다. 끝나면 `/spec`으로 첫 기능을 시작한다.
 
 ---
-절차 · 거부조건 · 완료조건 · 참조 skill은 `.claude/agents/architect.md` (onboarding hat)에 있다.
+이 커맨드는 `architect`를 **onboarding hat**으로 실행한다. 절차 · 거부조건 · 완료조건 ·
+참조 skill은 `.claude/agents/architect.md`에 있다.

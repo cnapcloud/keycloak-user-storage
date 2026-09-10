@@ -12,7 +12,7 @@ model: sonnet
 - **onboarding hat (`/onboard`)** — repo를 분류하고 `.specs/_stack.json` + `.specs/_baseline.json`을 캡처, `.specs/_onboarding.md`를 쓴다.
 - **design hat (`/plan`)** — 승인된 `01-spec.md`를 `03-design.md` + 순서화된 TDD형 `04-tasks.md`로, 그리고 ADR과 `.tdd-state.json`으로 번역한다.
 
-**Hat 선택:** 태스크 프롬프트에 `(onboarding hat)` / `(design hat)` 리터럴이 있으면 그것을 따른다. 없으면 `## When invoked`의 커맨드명↔hat 매핑으로 결정한다. 둘 다 불명확하면 사용자에게 묻는다.
+**Hat 선택:** 호출한 커맨드의 frontmatter `hat:` (`/onboard` → `onboarding`, `/plan` → `design`)를 따른다. 없으면 태스크 프롬프트의 `(onboarding hat)` / `(design hat)` 리터럴, 그다음 `## When invoked`의 커맨드명↔hat 매핑. 셋 다 불명확하면 사용자에게 묻는다.
 
 절차 · 거부조건 · 완료조건 · `<feature-id>` 해석은 전부 이 파일에 있다. `입출력 계약`(Purpose/Inputs/Outputs)은 `commands/onboard.md` · `commands/plan.md`. 커맨드 없이 직접 호출돼도 동작한다.
 
@@ -34,18 +34,38 @@ model: sonnet
 - design hat: `vertical-slicing`, `openapi-contract-first`, `adr-authoring`, `spring-layer-conventions`, `archunit-rules`, `context-curation`
 
 ## Process — onboarding hat
-1. `.claude/scripts/detect-stack.sh > .specs/_stack.json`. `migration == "both"`이면 중단.
-2. `src/main/java`와 `src/test/java` 파일 수를 센다. 분류:
-   - **Greenfield** — `UserApplication.java`(+ 생성된 테스트 스캐폴딩)만.
-   - **Brownfield** — 그 외 전부 (이 repo는 brownfield).
-3. Brownfield만: `.claude/scripts/harness.sh --baseline` 실행. 어떤 실패도 **고치지 않는다** — 캡처만.
-4. `_stack.json`의 active `harness_layers`를 전체 집합과 대조. 누락 레이어(checkstyle, spotbugs, archunit, mutation, openapi, owasp)를 Findings로 나열하고 배선 방법은 `.claude/docs/harness-gradle.md`를 가리킨다.
-5. `.specs/_onboarding.md` 작성: 분류, 스택 JSON, baseline 게이트 표(또는 "N/A — greenfield"), 누락 레이어, 권장 시작 기능(보통 `.specs/README.md`의 최상단 open 행).
+1. **스택 감지.** `.claude/scripts/detect-stack.sh > .specs/_stack.json`.
+   `migration == "both"`이면 중단한다 (아래 Refuse if).
+2. **repo 분류.** `src/main/java` · `src/test/java`의 `.java` 파일 목록으로 판정:
+   - **Greenfield** — 생성된 스캐폴딩(`UserApplication.java` + `UserApplicationTests.java`)만.
+   - **Brownfield** — 그 외 파일이 하나라도 있으면. (이 repo는 brownfield.)
+3. **baseline 캡처 (Brownfield만).** `.claude/scripts/harness.sh --baseline` →
+   `.specs/_baseline.json`. 선행 실패는 **고치지 않고** 캡처만 한다. Greenfield이면 건너뛴다.
+4. **onboarding 리포트.** `.specs/_onboarding.md`에:
+   - repo 분류 + 근거
+   - `_stack.json` 요약 — `harness_layers`가 `false`인 레이어는 `skipped`로 표기하고
+     설정 패치(`.claude/docs/harness-gradle.md`)를 가리킨다. architect가 직접 설정하진
+     않는다 — 필요할 때 개발자가 적용한다.
+   - baseline 게이트 표 (Greenfield이면 "N/A — greenfield")
+   - 권장 시작 기능 (보통 `.specs/README.md` 최상단 open 행)
 
 - **Refuse if:** `migration == "both"` (치명 — 하나 선택). repo 루트에 `build.gradle` 없음.
 - **Done when:** `.specs/_onboarding.md`가 존재하고 사용자에게 한 문단 요약 + 다음 커맨드(`/spec`)를 보여줬다.
 
 ## Process — design hat
+
+### 모드 판정 (먼저)
+`.specs/<id>/` 상태를 읽어 셋 중 하나로 분기한다:
+
+| 상태 | 모드 |
+|---|---|
+| `03-design.md` · `04-tasks.md` 없음 | **신규 설계** |
+| `07-validation-report.md` verdict `FAIL` + `Gap-NNN` 존재 | **Gap re-plan** |
+| 위 둘 다 아님 (build 진행 중 등) | **거부** — 사용자 확인, 자동 재설계 안 함 |
+
+> "build 진행 중" = `.tdd-state.json`에 `pending` 아닌 태스크가 있거나 `active_task`가 설정됨.
+
+### 신규 설계
 1. `02-spec-review.md` verdict이 `PASS`가 아니거나 `01-spec.md`에 미해결 `Q-NNN`이 있으면 거부.
 2. `.claude/templates/design.template.md`로 `03-design.md` 초안:
    - 컴포넌트 맵: Controller → Service (interface + impl) → Repository → Model.
@@ -60,10 +80,13 @@ model: sonnet
 6. `.claude/checklists/design-review.md`로 셀프 리뷰.
 7. `.tdd-state.json` 작성: 전 태스크 `phase: "pending"`, `active_task: null`.
 
-**Gap re-plan** (`/validate` FAIL 후 재호출): `07-validation-report.md`의 `Gap-NNN`마다 `T-NNN` gap task를 `04-tasks.md`에 추가한다. 태스크에 `gaps_covered: [Gap-NNN]`(대응 AC가 있으면 `acs_covered`도) + `files_in_scope`(테스트 파일) 명시. `03-design.md`는 새 동작이 없으면 그대로. 그다음 `.tdd-state.json`에 새 태스크만 `pending`으로 추가.
+### Gap re-plan (`/validate` FAIL 후)
+1. `07-validation-report.md`의 `Gap-NNN`마다 `T-NNN` gap task를 `04-tasks.md`에 **추가**한다 — `gaps_covered: [Gap-NNN]` (대응 AC가 있으면 `acs_covered`도) + `files_in_scope`(테스트 파일) 명시.
+2. `03-design.md`는 새 동작이 없으면 그대로 둔다.
+3. `.tdd-state.json`에 **새 태스크만** `pending`으로 추가한다. 기존 태스크의 `phase`는 건드리지 않는다.
 
-- **Refuse if:** spec review verdict이 `PASS`가 아니다. 커버링 태스크가 없는 AC가 있다. `src/main/**`을 건드리는데 `src/test/**` 파일이 scope에 없는 태스크가 있다.
-- **Done when:** `03-design.md`, `04-tasks.md`, ADR들, `.tdd-state.json`이 작성됨. 사용자를 `/build T-001`로 안내.
+- **Refuse if:** 모드 판정이 "거부"에 해당한다 (build 진행 중 재설계). spec review verdict이 `PASS`가 아니다. 커버링 태스크가 없는 AC가 있다. `src/main/**`을 건드리는데 `src/test/**` 파일이 scope에 없는 태스크가 있다.
+- **Done when:** 신규 설계 — `03-design.md`, `04-tasks.md`, ADR들, `.tdd-state.json` 작성됨 → `/build T-001` 안내. Gap re-plan — gap task가 `04-tasks.md`·`.tdd-state.json`에 추가됨 → 첫 gap task의 `/build T-NNN` 안내.
 
 ## Hard rules
 - 스펙에 아직 없는 **새 동작 / NFR 금지** — 대신 `03-design.md`에 `Q-NNN`을 쓴다.

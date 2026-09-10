@@ -33,11 +33,11 @@ _최초 캡처: 2026-09-08 · git `4c36ad4` · 브랜치 `chore/spec-driven-harn
 | 레이어 | 상태 | 비고 |
 |---|---|---|
 | unit | **fail** | 38 테스트 · **3 실패** — 아래 "선행 실패" |
-| coverage | skipped | `build.gradle` `jacocoTestReport { reports.xml.required = true }` 미설정 |
-| archunit | skipped | 플러그인/규칙 미배선 |
-| checkstyle | skipped | 플러그인 미배선 |
-| spotbugs | skipped | 플러그인 미배선 |
-| mutation | skipped | pitest 미배선 |
+| coverage | skipped | harness에 미설정 — 아래 "미설정 레이어" |
+| archunit | skipped | 〃 |
+| checkstyle | skipped | 〃 |
+| spotbugs | skipped | 〃 |
+| mutation | skipped | 〃 |
 
 > **브라운필드 래칫**: 이후 모든 `/validate`는 이 표 대비 **회귀만** 차단한다.
 > 현재 3개 실패는 "day-one 차단"이 아니라 기준선. 신규/변경 코드는 풀 기준
@@ -56,21 +56,24 @@ _최초 캡처: 2026-09-08 · git `4c36ad4` · 브랜치 `chore/spec-driven-harn
 
 ---
 
-## 미배선 레이어 (Findings)
+## 미설정 레이어 (Findings)
 
-`_stack.json.harness_layers`에서 `false` — 배선 방법은
+`_stack.json.harness_layers`에서 `false` — 설정 방법은
 [`../.claude/docs/harness-gradle.md`](../.claude/docs/harness-gradle.md):
 
 | 레이어 | 필요 | 차단 요소 |
 |---|---|---|
 | coverage | `jacocoTestReport { reports.xml.required = true }` | 없음 — 즉시 가능 |
-| checkstyle | `checkstyle` 플러그인 + `config/checkstyle/checkstyle.xml` | 내부 저장소 플러그인 미러 확인 |
-| spotbugs | `com.github.spotbugs` 플러그인 + `config/spotbugs/exclude.xml` | 〃 |
+| checkstyle | `checkstyle` 플러그인 + `config/checkstyle/checkstyle.xml` | config 파일 작성 |
+| spotbugs | `com.github.spotbugs` 플러그인 + `config/spotbugs/exclude.xml` | exclude 필터 작성 |
 | archunit | `com.tngtech.archunit:archunit-junit5` + `ArchitectureTest.java` | `.claude/skills/archunit-rules/SKILL.md` 규칙 확정 |
-| mutation | `info.solidsoft.pitest` 플러그인 + `targetClasses` | 내부 저장소 플러그인 미러 확인 |
-| openapi | `org.springdoc.openapi-gradle-plugin` + `springdoc-openapi-starter-webmvc-api` | 〃 |
+| mutation | `info.solidsoft.pitest` 플러그인 + `targetClasses` | 없음 |
+| openapi | `org.springdoc.openapi-gradle-plugin` + `springdoc-openapi-starter-webmvc-api` | 없음 |
 
-→ 후속 feature: `.specs/`에 `wire-gradle-harness` 행 (README 참조).
+> 플러그인은 Gradle Plugin Portal, 의존성은 Maven Central에서 받는다 (사내 미러 불필요).
+
+→ 정식 feature 아님. 필요할 때 개발자가 harness-gradle.md 패치를 직접 적용하고
+`harness.sh --baseline`로 baseline을 갱신한다.
 
 ---
 

@@ -1,20 +1,44 @@
-# Harness — Gradle wiring (NOT YET APPLIED)
+# Configuring the harness
 
-> This document is the **input to a future feature**, not a live config.
-> Wire it through its own workflow run: `/spec` → … under
-> `.specs/<date>-wire-gradle-harness/`, one layer per task, verifying plugin
-> resolution against the internal repo (`reposilite.kind.internal`) each step.
->
-> Until then `.claude/scripts/harness.sh` reports these layers as `skipped`,
-> which is not a failure.
+`.claude/scripts/harness.sh` is this repo's self-validation harness — the gate
+runner behind `/validate`. It bundles the project's verification layers (tests,
+coverage, static analysis, ...) behind one script.
 
-## Current state (`build.gradle`)
-- `plugins`: `org.springframework.boot`, `io.spring.dependency-management`, `java`, `java-library`, `maven-publish`, `jacoco`
-- Active harness layers: **unit** (`test`), and **coverage** once the XML report is enabled (one-liner below).
+---
 
-## Layer-by-layer patch
+## What the harness runs
 
-### 0. Enable JaCoCo XML (smallest, do first)
+`harness.sh` is invoked by `/validate` (the main path), by `/onboard --baseline`,
+or manually. On each run it inspects `build.gradle`, executes the layers that are
+configured there in order, and parses each layer's report into a per-gate
+`{status, ...}` in `build/harness-summary.json`, which `/validate` then turns into
+its verdict.
+
+The layers, in run order:
+
+- **unit** — run the JUnit test suite.
+- **coverage** — JaCoCo line/branch coverage from the test run.
+- **checkstyle** — code-style rules on source and tests.
+- **spotbugs** — static bug pattern analysis on compiled classes.
+- **archunit** — architecture/layering rules, checked as JUnit tests.
+- **mutation** — PIT mutation testing (kill rate of the test suite).
+- **openapi** — regenerate the OpenAPI spec and diff it for breaking changes.
+- **owasp** — OWASP Dependency-Check scan for known-vulnerable dependencies.
+
+A layer whose plugin is not in `build.gradle` is reported as `"skipped"`, which is
+**not a failure** — `/validate` enforces only the configured layers.
+
+---
+
+## Adding a layer
+
+Each section below adds one layer, and they are independent — apply them in any
+order (patch 0 is the smallest, so start there). The plugins and dependencies must
+be resolvable from a public or internal repository the build host can reach. After
+applying a layer, re-run `/onboard` (or `harness.sh --baseline`) so `.specs/_stack.json` and
+`.specs/_baseline.json` pick up the new gate.
+
+### 0. Enable JaCoCo XML
 ```groovy
 jacocoTestReport {
     dependsOn test
@@ -100,7 +124,7 @@ openApi {
 }
 ```
 `harness.sh` then diffs the generated `openapi.yaml` against `origin/main` and flags
-breaking changes. **Verify springdoc resolves from the internal repo first.**
+breaking changes.
 
 ### 7. OWASP Dependency-Check (LAST — offline risk)
 ```groovy
@@ -111,10 +135,19 @@ dependencyCheck {
     nvd { datafeedUrl = '<internal NVD mirror or cached feed>' }
 }
 ```
-Needs an NVD data feed the build host can reach. If there is no internal mirror,
+The analysis needs an NVD data feed the build host can reach. If no reachable feed,
 keep this layer `skipped` and track CVEs manually.
 
-## Detection
-`.claude/scripts/detect-stack.sh` greps `build.gradle` for each plugin id and reports
-which layers are active in `.specs/_stack.json`. After applying a layer, re-run
-`/onboard` (or `harness.sh --baseline`) to refresh the baseline.
+---
+
+## This project's current build configuration
+
+- Applied `plugins`: `org.springframework.boot`, `io.spring.dependency-management`,
+  `java`, `java-library`, `maven-publish`, `jacoco`.
+- The only enforced gate is `unit`. Every other layer is `skipped`.
+- The `jacoco` plugin is applied, so the `jacocoTestReport` task exists and runs —
+  but without `reports.xml.required = true` it emits only HTML. The harness looks
+  for the XML report, does not find it, and marks coverage `skipped`. Patch 0
+  above turns it on.
+
+---

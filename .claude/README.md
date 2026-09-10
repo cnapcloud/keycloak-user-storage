@@ -6,7 +6,7 @@
 ## 진입점
 
 ```
-/onboard → /spec → /spec-review → /plan → /build T-NNN → /validate → /review → commit
+/onboard → /spec → /spec-review → /plan → (/build T-NNN → commit) ×N → /validate → /review → commit
 ```
 
 새 작업을 시작할 때:
@@ -53,9 +53,9 @@
 ## Harness 현황
 
 `harness.sh`는 지금 **unit** 게이트만 활성(+`jacocoTestReport` XML 켜면 coverage).
-checkstyle/spotbugs/archunit/mutation/openapi/owasp는 `skipped` — 배선 방법은
-[`docs/harness-gradle.md`](docs/harness-gradle.md)에 있고, 별도 feature
-(`.specs/<date>-wire-gradle-harness/`)로 진행한다. `skipped`는 실패가 아니다.
+checkstyle/spotbugs/archunit/mutation/openapi/owasp는 `skipped` — 설정 패치는
+[`docs/harness-gradle.md`](docs/harness-gradle.md)에 있고, 필요할 때 개발자가 직접
+적용한다. `skipped`는 실패가 아니다.
 
 ## 이관 이력
 

@@ -2,6 +2,7 @@
 description: Phase 6 — 커밋 전 diff 셀프리뷰, 08-code-review.md 산출.
 argument-hint: "[feature-id] [--base <ref>]"
 agent: validator
+hat: review
 ---
 # /review — Phase 6
 
@@ -21,4 +22,5 @@ findings만 남긴다.
 `must-fix`가 0건이면 사용자가 직접 `git commit`한다. 남아 있으면 `/build`로 돌아가 고친다.
 
 ---
-절차 · 거부조건 · 완료조건 · 참조 skill은 `.claude/agents/validator.md` (review hat)에 있다.
+이 커맨드는 `validator`를 **review hat**으로 실행한다. 절차 · 거부조건 · 완료조건 ·
+참조 skill은 `.claude/agents/validator.md`에 있다.

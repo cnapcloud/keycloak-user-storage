@@ -4,7 +4,7 @@
 진입점 · 강제 장치: [`../.claude/README.md`](../.claude/README.md) · 방법론: [`../.claude/docs/methodology.md`](../.claude/docs/methodology.md).
 
 ```
-/onboard → /spec → /spec-review → /plan → /build T-NNN → /validate → /review → commit
+/onboard → /spec → /spec-review → /plan → (/build T-NNN → commit) ×N → /validate → /review → commit
 ```
 
 각 기능은 `YYYY-MM-DD-<feature-id>/` 폴더 아래 번호가 매겨진 산출물 체인
@@ -18,7 +18,7 @@
 |---|---|
 | [`_stack.json`](_stack.json) | 스택 분류 + 활성 harness 레이어 |
 | [`_baseline.json`](_baseline.json) | brownfield 기준선 — 이후 게이트는 이 대비 회귀만 차단 |
-| [`_onboarding.md`](_onboarding.md) | 분류 결과 + 기준선 게이트 표 + 미배선 레이어 + 권장 첫 `/spec` |
+| [`_onboarding.md`](_onboarding.md) | 분류 결과 + 기준선 게이트 표 + 미설정 레이어 + 권장 첫 `/spec` |
 
 ---
 
@@ -26,17 +26,19 @@
 
 | 상태 | feature-id | 요약 |
 |---|---|---|
-| _(없음)_ | | 다음 작업을 `/spec "<설명>"` 으로 시작 |
+| 진행 중 (spec) | `2026-09-10-fix-otp-seed-test-drift` | 시드 사용자 `otpMethod` ↔ `UserStorageIntegrationTest` 단언 정합. 커밋 `8bdd8d6`(SKIP→SMS 2건)이 단언 미갱신 → 선행 실패 3건. 고친 뒤 `harness.sh --baseline` 재실행해 `_baseline.json` ratchet down. |
 
-> 새 기능: 위 표에 행을 추가하고 `/spec` 실행 → `YYYY-MM-DD-<feature-id>/01-spec.md` 생성.
+> `/spec`이 이 표를 관리한다 — 새 feature를 `진행 중 (spec)`으로 추가/갱신한다.
+> 상태 라벨: `예정` → `진행 중 (spec)` → 이후 phase는 사람이 갱신 (`(plan)`/`(build)`/…) → 완료 시 "완료 이력"으로 이동.
 
 ---
 
 ## 후속 인프라 작업
 
-| 상태 | feature-id | 요약 |
-|---|---|---|
-| 예정 | `wire-gradle-harness` | `build.gradle`에 checkstyle · spotbugs · pitest · archunit · openapi 플러그인 실제 배선. 입력물: [`../.claude/docs/harness-gradle.md`](../.claude/docs/harness-gradle.md). 내부 `reposilite.kind.internal` 플러그인 미러 확인 필요. |
+harness 레이어(checkstyle · spotbugs · pitest · archunit · openapi · owasp) 설정은
+정식 feature로 태우지 않는다 — 필요할 때 개발자가 [`../.claude/docs/harness-gradle.md`](../.claude/docs/harness-gradle.md)의
+패치를 `build.gradle`에 직접 적용하고 `harness.sh --baseline`로 baseline을 갱신한다.
+플러그인은 Gradle Plugin Portal, 의존성은 Maven Central에서 해결.
 
 ---
 
