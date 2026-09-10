@@ -40,13 +40,16 @@ feature_dir="$(dirname "$spec_file")"
 open_hits=""
 for f in "$feature_dir/01-spec.md" "$feature_dir/03-design.md" "$feature_dir/04-tasks.md"; do
   [ -f "$f" ] || continue
-  # Lines like "- Q-001:" whose following "Status:" line is "open" (or missing).
+  # Only the "## Open Questions" section counts. A "- Q-001" bullet there whose
+  # following "Status:" line is "open" (or missing) blocks. Bullets under
+  # "## Resolved Questions" (or any other heading) are ignored.
   hits="$(awk '
-    /^- Q-[0-9]+/ { qline=$0; status="open"; next }
+    /^##[[:space:]]/ { in_oq = ($0 ~ /Open Questions/); next }
+    !in_oq { next }
+    /^- Q-[0-9]+/ { qline=$0; next }
     /^[[:space:]]*-?[[:space:]]*Status:/ {
       s=tolower($0)
-      if (s ~ /resolved/ || s ~ /deferred/) status="handled"
-      else status="open"
+      status = (s ~ /resolved/ || s ~ /deferred/) ? "handled" : "open"
       if (qline != "") { print FILENAME ": " qline "  [" status "]"; qline="" }
     }
     END { if (qline != "") print FILENAME ": " qline "  [open]" }
