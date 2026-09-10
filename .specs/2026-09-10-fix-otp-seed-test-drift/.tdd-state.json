@@ -1,0 +1,25 @@
+{
+  "feature_id": "2026-09-10-fix-otp-seed-test-drift",
+  "active_task": null,
+  "tasks": {
+    "T-001": {
+      "phase": "done",
+      "acs_covered": ["AC-001", "AC-002", "AC-005", "AC-007"],
+      "files_in_scope": [
+        "src/test/java/com/keycloak/userstorage/UserStorageIntegrationTest.java"
+      ],
+      "depends_on": [],
+      "red_at": "2026-09-10T11:40:00Z",
+      "red_failure_excerpt": "search_byAttributeKey_otpMethod_returnsAllUsers (L528) & count_byAttributeKey_otpMethod_returns17 (L564): AssertionFailedError 'otpMethod=SKIP ... 16명 전원' ==> expected: <16> but was: <14>",
+      "done_at": "2026-09-10T11:45:00Z"
+    },
+    "T-002": {
+      "phase": "pending",
+      "acs_covered": ["AC-003", "AC-004", "AC-006"],
+      "files_in_scope": [
+        "src/test/java/com/keycloak/userstorage/UserStorageIntegrationTest.java"
+      ],
+      "depends_on": ["T-001"]
+    }
+  }
+}

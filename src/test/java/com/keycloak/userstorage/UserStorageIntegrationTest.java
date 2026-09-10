@@ -12,6 +12,7 @@ import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -519,13 +520,16 @@ class UserStorageIntegrationTest {
 
     @Test
     @Order(28)
-    void search_byAttributeKey_otpMethod_returnsAllUsers() {
+    @Tag("AC-001")
+    @Tag("AC-005")
+    @Tag("AC-007")
+    void search_byAttributeKey_otpMethod_skip_returns14() {
         ResponseEntity<List<Map<String, Object>>> response = rest.exchange(
                 "/user/search?otpMethod=SKIP", HttpMethod.GET, null,
                 new ParameterizedTypeReference<>() {});
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(16, response.getBody().size(), "otpMethod=SKIP 는 시드 16명 전원");
+        assertEquals(14, response.getBody().size(), "otpMethod=SKIP 시드 사용자 14명 (john·jane은 SMS)");
     }
 
     @Test
@@ -559,9 +563,12 @@ class UserStorageIntegrationTest {
 
     @Test
     @Order(31)
-    void count_byAttributeKey_otpMethod_returns17() {
+    @Tag("AC-002")
+    @Tag("AC-005")
+    @Tag("AC-007")
+    void count_byAttributeKey_otpMethod_skip_returns14() {
         Long count = rest.getForObject("/user/count?otpMethod=SKIP", Long.class);
-        assertEquals(16L, count, "otpMethod=SKIP 카운트 16명 전원");
+        assertEquals(14L, count, "otpMethod=SKIP 카운트 14명 (john·jane은 SMS)");
     }
 
     @Test
