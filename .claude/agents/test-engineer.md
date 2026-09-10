@@ -34,7 +34,7 @@ For each `/build` task, write the **failing test(s) first** (red step). Coverage
 
 **Gap task (커버리지/traceability 갭 닫기)** — 별도 절차가 아니라 위 red step을 그대로 쓴다.
 타깃은 `07-validation-report.md`의 `Gap-NNN`(미커버 라인 / 생존 mutant). 그 코드 경로가 기존 AC를
-삼각측량하면 해당 `@Tag("AC-NNN")`으로 테스트를 추가한다. 대응하는 AC가 전혀 없는 orphan 라인이면
+교차 검증(triangulation)하면 해당 `@Tag("AC-NNN")`으로 테스트를 추가한다. 대응하는 AC가 전혀 없는 orphan 라인이면
 테스트를 억지로 만들지 말고 `Q-NNN`을 태스크 노트에 붙여 `spec-author`로 반송한다
 (`requirements-traceability` skill: orphan code path = design gap).
 

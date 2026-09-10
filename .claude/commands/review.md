@@ -17,6 +17,7 @@ findings만 남긴다.
 
 ## Outputs
 - `.specs/<id>/08-code-review.md` — `F-NNN` findings (`must-fix` / `should-fix` / `nit` / `praise`) + Approve / Approve-with-waivers / Request-changes
+- `.specs/README.md` — verdict가 Approve 계열이면 이 feature 행을 "진행 중 / 예정"에서 "완료 이력"으로 이동
 
 ## Next
 `must-fix`가 0건이면 사용자가 직접 `git commit`한다. 남아 있으면 `/build`로 돌아가 고친다.

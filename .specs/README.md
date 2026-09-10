@@ -26,10 +26,10 @@
 
 | 상태 | feature-id | 요약 |
 |---|---|---|
-| 진행 중 (spec) | `2026-09-10-fix-otp-seed-test-drift` | 시드 사용자 `otpMethod` ↔ `UserStorageIntegrationTest` 단언 정합. 커밋 `8bdd8d6`(SKIP→SMS 2건)이 단언 미갱신 → 선행 실패 3건. 고친 뒤 `harness.sh --baseline` 재실행해 `_baseline.json` ratchet down. |
+| _(없음)_ | | 다음 작업을 `/spec "<설명>"` 으로 시작 |
 
-> `/spec`이 이 표를 관리한다 — 새 feature를 `진행 중 (spec)`으로 추가/갱신한다.
-> 상태 라벨: `예정` → `진행 중 (spec)` → 이후 phase는 사람이 갱신 (`(plan)`/`(build)`/…) → 완료 시 "완료 이력"으로 이동.
+> `/spec`이 이 표에 새 feature를 `진행 중 (spec)`으로 추가하고, `/review`가 Approve 시 "완료 이력"으로 옮긴다.
+> 상태 라벨: `예정` → `진행 중 (spec)` → 중간 phase는 사람이 갱신 (`(plan)`/`(build)`/`(validate)`) → `/review` Approve → "완료 이력".
 
 ---
 
@@ -42,8 +42,16 @@ harness 레이어(checkstyle · spotbugs · pitest · archunit · openapi · owa
 
 ---
 
-## 완료 이력 (구 `.claude/backlogs/` · `.claude/plans/`)
+## 완료 이력
 
+### harness 워크플로우 (`.specs/YYYY-MM-DD-<id>/`)
+`/review` Approve 시 이 표로 이동. 상세는 `.specs/<id>/` 산출물 체인.
+
+| feature-id | verdict | 결과 |
+|---|---|---|
+| `2026-09-10-fix-otp-seed-test-drift` | validate PASS · review Approve | 시드 `otpMethod` drift 해소 — `UserStorageIntegrationTest` 단언 16→14, 교집합 질의 `SKIP`→`SMS`, `otpMethod=SMS` characterization 테스트 추가. `unit` 3f→0, 7/7 AC. should-fix 1(`@DisplayName` follow-up). 커밋 `3ac2f1a`·`1805205` |
+
+### 구 백로그 (harness 이전 · 자유서술형)
 BL-01~10 은 이 harness 도입 **이전**에 자유서술형 백로그/계획서 방식으로 완료됨.
 상세 근거는 git history. 아래는 압축 인덱스.
 
@@ -60,14 +68,8 @@ BL-01~10 은 이 harness 도입 **이전**에 자유서술형 백로그/계획�
 | BL-09 | USP API 규격 정리 | `GlobalExceptionHandler`(`@RestControllerAdvice`) → 전 에러 `{"error": "..."}`. `PUT /credential/{id}` upsert 버그 수정 → 204 / 404. 스펙 외 `GET /credential`·`POST /credential` 제거 |
 | BL-10 | `/user/search` attributes 키 검색 | `UserRepositoryImpl` Criteria API — unknown 필드는 `USER_ATTRIBUTES` `MapJoin` EXISTS 서브쿼리로. 복합 조건 AND. `count` 동일 적용 |
 
-### 알려진 회귀 (baseline 캡처됨, 미해결)
+### 알려진 회귀 — 해소됨 (baseline ratchet down 대기)
 
-`_baseline.json` `gates.unit.status = "fail"` — `UserStorageIntegrationTest` 3건 실패:
-
-- `search_byAttributeKey_otpMethod_returnsAllUsers` — `otpMethod=SKIP` 16 기대, 실제 14
-- `count_byAttributeKey_otpMethod_returns17` — 동일 원인
-- `search_combinedFieldAndAttribute_returnsIntersection` — 교집합 1 기대, 실제 0
-
-원인: 커밋 `8bdd8d6`(시드 사용자 `otpMethod` SKIP→SMS 2건)이 테스트 단언을 갱신하지 않음.
-harness 도입과 무관한 선행 breakage. 별도 `/spec` (예: `fix-otp-seed-test-drift`)으로 처리 권장 —
-그때 `_baseline.json` 을 함께 갱신(ratchet down)한다.
+`_baseline.json` `gates.unit.status = "fail"` (선행 실패 3건, 커밋 `8bdd8d6` 시드 `otpMethod` SKIP→SMS 후
+단언 미갱신)은 **`2026-09-10-fix-otp-seed-test-drift`에서 해소**됨 (커밋 `3ac2f1a`·`1805205`, `unit` 3f→0).
+머지 후 `harness.sh --baseline` 재실행으로 `_baseline.json`을 `fail`→`pass`로 ratchet down.

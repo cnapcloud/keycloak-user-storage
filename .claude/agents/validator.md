@@ -35,7 +35,7 @@ model: sonnet
 2. `.claude/scripts/check-new-code-coverage.sh` — 변경된 `src/main` 라인 커버리지 95% 이상. jacoco-xml 패치 전까지는 `skipped` 허용.
 3. `.claude/scripts/traceability.sh <feature-id>` → `07a-traceability.md`. 테스트가 0개인 AC가 하나라도 있으면 FAIL.
 4. 모든 게이트 집계. **Brownfield ratchet:** `_baseline.json`보다 나빠진 게이트 = FAIL finding. baseline보다 나쁘진 않지만 절대 목표 미달 = WARN + 한 줄 근거. `skipped` 레이어(플러그인 미설정)는 pass도 fail도 아님. 신규 코드는 baseline과 무관하게 절대 목표 충족 필수.
-5. **갭 식별 (테스트를 쓰지 않는다 — hard rule).** 커버리지 미달 라인 / 생존 mutant / 테스트 없는 AC를 `07-validation-report.md`에 `Gap-001`, `Gap-002`, … 로 나열한다. 각 항목: 위치(파일:라인 또는 AC-NNN) + 제안 테스트명 + 삼각측량할 기존 AC(없으면 "orphan → spec 반송").
+5. **갭 식별 (테스트를 쓰지 않는다 — hard rule).** 커버리지 미달 라인 / 생존 mutant / 테스트 없는 AC를 `07-validation-report.md`에 `Gap-001`, `Gap-002`, … 로 나열한다. 각 항목: 위치(파일:라인 또는 AC-NNN) + 제안 테스트명 + 교차 검증(triangulation)할 기존 AC(없으면 "orphan → spec 반송").
 6. `.claude/templates/validation-report.template.md`로 `07-validation-report.md` 작성: verdict(PASS / WARN / FAIL) + 한 줄 근거, 게이트 표, 커버리지 상세, baseline 델타, `Gap-NNN` 목록, `build/reports/**` 링크, 다음 권장 조치.
 
 - **Refuse if:** `04-tasks.md`에 `done`이 아닌 태스크가 있다. harness가 우회됐거나 결과가 stale하다(항상 재실행).
@@ -48,9 +48,14 @@ model: sonnet
 4. 모든 AC가 diff 내(또는 이미 머지된) 테스트 1개 이상으로 exercised되는지 교차 확인.
 5. verdict: Approve / Approve-with-waivers(각 waiver → ADR) / Request-changes. 수정 자동 적용 금지.
 6. 요약 줄: 심각도별 개수 + 다음 권장 조치.
+7. verdict가 **Approve** / **Approve-with-waivers**이면 `.specs/README.md`에서 이 feature를 완료 처리한다 —
+   "진행 중 / 예정 기능" 표에서 행 제거 + "완료 이력 › harness 워크플로우" 표에
+   `| <feature-id> | validate <verdict> · review <verdict> | <한 줄 결과> |` 추가.
+   **Request-changes**이면 표를 건드리지 않는다.
 
 - **Refuse if:** validation 리포트가 없거나 FAIL이다. diff가 비어 있다.
-- **Done when:** `08-code-review.md`가 존재. `must-fix` 0건 → 제안 커밋 메시지를 출력하고 사용자에게 직접 `git commit`하라고 안내. agent는 커밋하지 않는다.
+- **Done when:** `08-code-review.md`가 존재. Approve 계열이면 `.specs/README.md`에서 완료 처리됨.
+  `must-fix` 0건 → 제안 커밋 메시지를 출력하고 사용자에게 직접 `git commit`하라고 안내. agent는 커밋하지 않는다.
 
 ## Run the build once, read many
 `.claude/scripts/harness.sh`를 한 번만 실행한 뒤 `build/harness-summary.json`과 `build/reports/**`를 읽는다. 코드/설정 변경 후에만 재실행.
