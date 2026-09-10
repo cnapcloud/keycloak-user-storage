@@ -60,6 +60,31 @@ UI/프론트엔드 영역은 제외.
 `/plan`이 생성, `/build`가 phase를 전이시킨다. `phase`: `pending → red → green → refactor → simplify → done`.
 `active_task`는 태스크 사이에서 `null`. hook 3종이 이 파일을 읽어 `src/main/**` 편집을 강제한다.
 
+## 브라운필드 기준선 (`_baseline.json`) 관리
+
+`/onboard`가 캡처한 `_baseline.json`은 `/validate`의 **허용 바닥**이다. `/validate`는 이 파일 대비
+**회귀만** 차단한다 — baseline이 `unit: fail (3)`이면 실패 3건까지는 통과 (신규/변경 라인은 항상 풀 기준).
+
+### baseline에 실패 게이트가 있을 때
+
+`_onboarding.md`에 캡처된 선행 실패(예: `unit: fail`)는 방치하지 않고 **정식 feature로** 해소한다:
+
+1. `.specs/README.md` "진행 중 / 예정"에 행 추가 → `/spec "<실패 설명>"`.
+2. 정규 라이프사이클 완주: `/spec-review → /plan → /build T-NNN → /validate → /review`.
+3. **모든 태스크·리뷰가 끝나 머지 가능한 상태가 되면** `harness.sh --baseline`를 재실행해
+   `_baseline.json`을 새 결과로 다시 캡처한다 (**ratchet down** — 허용 실패 수가 줄고, 이후 되돌릴 수 없음).
+   - feature 커밋과 **분리된 커밋**으로 한다. spec/ADR에서 `_baseline.json` 편집은 Non-Goal.
+   - 브랜치에서 떠서 함께 머지하거나, 머지 후 `main`에서 떠도 된다 (feature 커밋을 순수하게 유지하려는 관례일 뿐 필수 아님).
+
+### 재캡처(ratchet)를 안 하면
+
+- **게이트가 느슨한 채 남는다.** baseline이 여전히 `unit: fail (3)`이면, fix 이후 누군가 테스트를
+  1~2건 깨뜨려도 `/validate`가 "baseline보다 나쁘지 않음"으로 **통과시킨다.** 방금 고친 것이 조용히 되돌아간다.
+- **`/validate` 리포트가 노이즈가 된다.** "baseline delta"가 매번 "fail → pass, better"로 떠서
+  진짜 회귀와 구분이 흐려진다.
+- **`_onboarding.md`의 "선행 실패" 목록이 거짓이 된다.** 이미 해소된 항목을 미해결로 안내한다.
+- coverage·mutation 등 다른 레이어를 나중에 배선할 때, 낡은 baseline 위에서 새 기준선이 잘못 잡힌다.
+
 ## 강제 장치 (hooks — `.claude/settings.json`)
 
 | Hook | 이벤트 | 차단 조건 |

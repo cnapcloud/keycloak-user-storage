@@ -4,13 +4,14 @@
 갱신: `.claude/scripts/detect-stack.sh` + `.claude/scripts/harness.sh --baseline` 재실행.
 
 _최초 캡처: 2026-09-08 · git `4c36ad4` · 브랜치 `chore/spec-driven-harness`_
+_baseline ratchet: 2026-09-10 · git `bbf7c8d` · `unit` fail(3) → pass(0) (`2026-09-10-fix-otp-seed-test-drift` 완료)_
 
 ---
 
 ## 분류
 
 **Brownfield.** `src/main/java` 19개 파일 (Controller 2 · Service 4 · Repository 4 · Model 3 · Config 4 · utils 1 · 진입점 1),
-`src/test/java` 1개 (`UserStorageIntegrationTest` — `@SpringBootTest(RANDOM_PORT)`, 38 케이스).
+`src/test/java` 1개 (`UserStorageIntegrationTest` — `@SpringBootTest(RANDOM_PORT)`, 39 케이스).
 
 단일 모듈 Gradle. 프로덕션 코드는 성숙 상태 (BL-01~10 완료). harness/spec 체인만 신규 도입.
 
@@ -32,7 +33,7 @@ _최초 캡처: 2026-09-08 · git `4c36ad4` · 브랜치 `chore/spec-driven-harn
 
 | 레이어 | 상태 | 비고 |
 |---|---|---|
-| unit | **fail** | 38 테스트 · **3 실패** — 아래 "선행 실패" |
+| unit | **pass** | 39 테스트 · 0 실패 (2026-09-10 ratchet — 아래 "선행 실패") |
 | coverage | skipped | harness에 미설정 — 아래 "미설정 레이어" |
 | archunit | skipped | 〃 |
 | checkstyle | skipped | 〃 |
@@ -40,19 +41,17 @@ _최초 캡처: 2026-09-08 · git `4c36ad4` · 브랜치 `chore/spec-driven-harn
 | mutation | skipped | 〃 |
 
 > **브라운필드 래칫**: 이후 모든 `/validate`는 이 표 대비 **회귀만** 차단한다.
-> 현재 3개 실패는 "day-one 차단"이 아니라 기준선. 신규/변경 코드는 풀 기준
-> (변경 라인 커버리지 ≥95%) 적용 — `.claude/skills/jacoco-coverage-policy/SKILL.md`.
+> 신규/변경 코드는 풀 기준 (변경 라인 커버리지 ≥95%) 적용 — `.claude/skills/jacoco-coverage-policy/SKILL.md`.
 
-### 선행 실패 3건 (harness 도입과 무관)
+### 선행 실패 3건 — 해소됨 (2026-09-10)
 
-`UserStorageIntegrationTest`:
+최초 캡처 시 `UserStorageIntegrationTest` 3건 실패:
+`search_byAttributeKey_otpMethod_returnsAllUsers`, `count_byAttributeKey_otpMethod_returns17`,
+`search_combinedFieldAndAttribute_returnsIntersection`. 원인: 커밋 `8bdd8d6`(시드 `otpMethod` SKIP→SMS 2건)이
+테스트 단언 미갱신.
 
-- `search_byAttributeKey_otpMethod_returnsAllUsers` — `otpMethod=SKIP` 16 기대 / 실제 14
-- `count_byAttributeKey_otpMethod_returns17` — 동일 원인
-- `search_combinedFieldAndAttribute_returnsIntersection` — 교집합 1 기대 / 실제 0
-
-원인: 커밋 `8bdd8d6` (시드 사용자 `otpMethod` SKIP→SMS 2건)이 테스트 단언 미갱신.
-→ 권장 첫 후속 `/spec`: **`fix-otp-seed-test-drift`** (시드 데이터 ↔ 단언 정합, `_baseline.json` ratchet down).
+→ **`2026-09-10-fix-otp-seed-test-drift`** 로 해소 (커밋 `3ac2f1a`·`1805205`). `harness.sh --baseline`
+재실행으로 위 표를 `unit: pass`로 ratchet down (커밋 `bcf64b2`).
 
 ---
 
@@ -79,7 +78,7 @@ _최초 캡처: 2026-09-08 · git `4c36ad4` · 브랜치 `chore/spec-driven-harn
 
 ## 권장 시작
 
-1. **`/spec "시드 otpMethod 테스트 정합"`** — 선행 실패 3건 해소 (가장 작은 수직 슬라이스, harness end-to-end 검증 겸용).
-2. 이후 신규 기능은 `.specs/README.md` "진행 중 / 예정" 표에 행 추가 후 `/spec`.
+1. ~~선행 실패 3건 해소~~ → 완료 (`2026-09-10-fix-otp-seed-test-drift`, `unit` pass).
+2. 신규 기능은 `.specs/README.md` "진행 중 / 예정" 표에 행 추가 후 `/spec`.
 
 **다음 명령:** `/spec`
