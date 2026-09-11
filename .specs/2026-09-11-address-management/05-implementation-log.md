@@ -53,3 +53,51 @@
 - command: `./gradlew test`
 - result: PASS — unchanged (41/41).
 - task status: `done`.
+
+### T-002 — red
+- when: 2026-09-11T04:20:15Z
+- test: `com.keycloak.userstorage.AddressIntegrationTest.createAddress_nonexistentUser_returns404` — `@Tag("AC-004")`
+- test: `com.keycloak.userstorage.AddressIntegrationTest.createAddress_invalidPostalCode_returns400` — `@Tag("AC-005")`
+- test: `com.keycloak.userstorage.AddressIntegrationTest.createAddress_blankRoadAddress_returns400` — `@Tag("AC-013")`
+- command: `./gradlew test --tests 'com.keycloak.userstorage.AddressIntegrationTest'`
+- result: MIXED (expected) — 5 tests run (2 pre-existing T-001 tests + 3 new), 2 failed.
+  - `createAddress_nonexistentUser_returns404` (AC-004) PASSED immediately — `AddressServiceImpl.createAddress()` already checks `userRepository.existsById(userId)` and throws 404 `"user not found"` from T-001's implementation. This is existing behaviour, not new work for T-002; test is kept to lock it in with its proper `@Tag`, per instructions not to force an artificial failure.
+  - `createAddress_invalidPostalCode_returns400` (AC-005) FAILED for the right reason — no postal-code validation exists yet.
+  - `createAddress_blankRoadAddress_returns400` (AC-013) FAILED for the right reason — no road-address validation exists yet.
+- excerpt:
+  ```
+  T-002: given an existing user, when POST /user/{userId}/addresses is submitted with a postal code
+  that is not exactly 5 digits, then the system responds with 400 and does not create an address FAILED
+      org.opentest4j.AssertionFailedError: expected: <400 BAD_REQUEST> but was: <201 CREATED>
+          at app//com.keycloak.userstorage.AddressIntegrationTest.createAddress_invalidPostalCode_returns400(AddressIntegrationTest.java:128)
+
+  T-002: given an existing user, when POST /user/{userId}/addresses is submitted with a blank road
+  address, then the system responds with 400 and does not create an address FAILED
+      org.opentest4j.AssertionFailedError: expected: <400 BAD_REQUEST> but was: <201 CREATED>
+          at app//com.keycloak.userstorage.AddressIntegrationTest.createAddress_blankRoadAddress_returns400(AddressIntegrationTest.java:146)
+
+  T-002: given a userId that does not exist, when POST /user/{userId}/addresses is submitted,
+  then the system responds with 404 and does not create an address PASSED (pre-existing behaviour from T-001)
+  ```
+
+### T-002 — green
+- when: 2026-09-11T13:20:00+09:00
+- files changed:
+  - `src/main/java/com/keycloak/userstorage/service/AddressServiceImpl.java` — added two `if` checks in `createAddress()`, after the existing user-existence check and before `setUserId`/save: postal code must match `\d{5}` (else `ResponseStatusException(BAD_REQUEST, "postal code must be exactly 5 digits")`), road address must not be `null`/blank (else `ResponseStatusException(BAD_REQUEST, "road address must not be blank")`). Manual validation per ADR-003 — no Bean Validation annotations, no new dependency.
+- command: `./gradlew test --tests 'com.keycloak.userstorage.AddressIntegrationTest'`
+- result: PASS — 5/5 (`createAddress_existingUser_returns201WithAddressFields`, `createAddress_sameUserTwice_bothSucceed`, `createAddress_nonexistentUser_returns404`, `createAddress_invalidPostalCode_returns400`, `createAddress_blankRoadAddress_returns400`), 0 failures, 0 errors.
+- command: `./gradlew test`
+- result: PASS — full suite green, no regressions. `AddressIntegrationTest`: 5 tests, 0 failures, 0 errors. `UserStorageIntegrationTest`: 39 tests, 0 failures, 0 errors. Total 44/44.
+
+### T-002 — refactor
+- when: 2026-09-11T13:22:00+09:00
+- change: extracted the two validation `if` blocks out of `createAddress()` into a new private `validate(Address address)` method, called right after the user-existence check. Matches `04-tasks.md` T-002 notes ("수동 `validate(Address)` 추가") and anticipates T-005 (PUT), whose notes say it will reuse this same `validate()`. No behaviour change — same checks, same order, same messages.
+- command: `./gradlew test`
+- result: PASS — unchanged (44/44).
+
+### T-002 — simplify
+- when: 2026-09-11T13:23:00+09:00
+- change: none — `createAddress()` already reads top-to-bottom with early-return guard clauses (existence check → validate → assign → save), `validate()` has no nesting/ternaries, and names (`postalCode`, `roadAddress`, `validate`) match `01-spec.md`/`04-tasks.md` glossary terms directly. No edits required.
+- command: `./gradlew test`
+- result: PASS — unchanged (44/44).
+- task status: `done`.

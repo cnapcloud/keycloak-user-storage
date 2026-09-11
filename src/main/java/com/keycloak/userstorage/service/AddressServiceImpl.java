@@ -28,8 +28,18 @@ public class AddressServiceImpl implements AddressService {
         if (!userRepository.existsById(userId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found");
         }
+        validate(address);
         address.setUserId(userId);
         address.setId("addr-" + UUID.randomUUID().toString().replace("-", "").substring(0, 8));
         return addressRepository.save(address);
+    }
+
+    private void validate(Address address) {
+        if (address.getPostalCode() == null || !address.getPostalCode().matches("\\d{5}")) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "postal code must be exactly 5 digits");
+        }
+        if (address.getRoadAddress() == null || address.getRoadAddress().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "road address must not be blank");
+        }
     }
 }

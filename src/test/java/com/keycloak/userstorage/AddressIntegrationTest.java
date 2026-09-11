@@ -24,6 +24,7 @@ import org.springframework.http.ResponseEntity;
  * 통합 테스트 — `/user/{userId}/addresses` 신규 엔드포인트 (2026-09-11-address-management)
  *
  * T-001: POST 주소 등록 — happy path + 1:N + 무제한 (AC-001, AC-002, AC-003, AC-012)
+ * T-002: POST 주소 등록 — 검증/사용자 없음 실패 경로 (AC-004, AC-005, AC-013)
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class AddressIntegrationTest {
@@ -34,6 +35,15 @@ class AddressIntegrationTest {
     private static final String SAMPLE_ADDRESS_BODY = String.format(
             "{\"postalCode\": \"%s\", \"roadAddress\": \"%s\", \"detailAddress\": \"%s\"}",
             SAMPLE_POSTAL_CODE, SAMPLE_ROAD_ADDRESS, SAMPLE_DETAIL_ADDRESS);
+    private static final String INVALID_POSTAL_CODE = "1234";
+    private static final String INVALID_POSTAL_CODE_BODY = String.format(
+            "{\"postalCode\": \"%s\", \"roadAddress\": \"%s\", \"detailAddress\": \"%s\"}",
+            INVALID_POSTAL_CODE, SAMPLE_ROAD_ADDRESS, SAMPLE_DETAIL_ADDRESS);
+    private static final String BLANK_ROAD_ADDRESS = "   ";
+    private static final String BLANK_ROAD_ADDRESS_BODY = String.format(
+            "{\"postalCode\": \"%s\", \"roadAddress\": \"%s\", \"detailAddress\": \"%s\"}",
+            SAMPLE_POSTAL_CODE, BLANK_ROAD_ADDRESS, SAMPLE_DETAIL_ADDRESS);
+    private static final String NONEXISTENT_USER_ID = "u-00000000";
 
     @Autowired
     private TestRestTemplate rest;
@@ -86,6 +96,55 @@ class AddressIntegrationTest {
             assertNotNull(firstId);
             assertNotNull(secondId);
             assertTrue(!firstId.equals(secondId), "두 주소는 서로 다른 id를 가져야 함");
+        } finally {
+            rest.delete("/user/" + userId);
+        }
+    }
+
+    @Test
+    @Tag("AC-004")
+    @DisplayName("T-002: given a userId that does not exist, when POST /user/{userId}/addresses is submitted, "
+            + "then the system responds with 404 and does not create an address")
+    void createAddress_nonexistentUser_returns404() {
+        ResponseEntity<Map<String, Object>> response = rest.exchange(
+                "/user/" + NONEXISTENT_USER_ID + "/addresses", HttpMethod.POST, jsonEntity(SAMPLE_ADDRESS_BODY),
+                new ParameterizedTypeReference<>() {});
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("user not found", response.getBody().get("error"));
+    }
+
+    @Test
+    @Tag("AC-005")
+    @DisplayName("T-002: given an existing user, when POST /user/{userId}/addresses is submitted with a postal code "
+            + "that is not exactly 5 digits, then the system responds with 400 and does not create an address")
+    void createAddress_invalidPostalCode_returns400() {
+        String userId = createTempUser("address-test-user-3");
+        try {
+            ResponseEntity<Map<String, Object>> response = rest.exchange(
+                    "/user/" + userId + "/addresses", HttpMethod.POST, jsonEntity(INVALID_POSTAL_CODE_BODY),
+                    new ParameterizedTypeReference<>() {});
+
+            assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+            assertEquals("postal code must be exactly 5 digits", response.getBody().get("error"));
+        } finally {
+            rest.delete("/user/" + userId);
+        }
+    }
+
+    @Test
+    @Tag("AC-013")
+    @DisplayName("T-002: given an existing user, when POST /user/{userId}/addresses is submitted with a blank road "
+            + "address, then the system responds with 400 and does not create an address")
+    void createAddress_blankRoadAddress_returns400() {
+        String userId = createTempUser("address-test-user-4");
+        try {
+            ResponseEntity<Map<String, Object>> response = rest.exchange(
+                    "/user/" + userId + "/addresses", HttpMethod.POST, jsonEntity(BLANK_ROAD_ADDRESS_BODY),
+                    new ParameterizedTypeReference<>() {});
+
+            assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+            assertEquals("road address must not be blank", response.getBody().get("error"));
         } finally {
             rest.delete("/user/" + userId);
         }

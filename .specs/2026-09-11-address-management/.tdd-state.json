@@ -18,13 +18,15 @@
       "red_failure_excerpt": "expected: <201 CREATED> but was: <404 NOT_FOUND> — POST /user/{userId}/addresses route does not exist yet"
     },
     "T-002": {
-      "phase": "pending",
+      "phase": "done",
       "acs_covered": ["AC-004", "AC-005", "AC-013"],
       "files_in_scope": [
         "src/main/java/com/keycloak/userstorage/service/AddressServiceImpl.java",
         "src/test/java/com/keycloak/userstorage/AddressIntegrationTest.java"
       ],
-      "depends_on": ["T-001"]
+      "depends_on": ["T-001"],
+      "red_at": "2026-09-11T04:20:15Z",
+      "red_failure_excerpt": "AC-005/AC-013 fail as expected (400 expected, got 201 — no validation yet); AC-004 already passes from T-001's user-existence check (existing behaviour, kept and tagged, not forced red)"
     },
     "T-003": {
       "phase": "pending",
