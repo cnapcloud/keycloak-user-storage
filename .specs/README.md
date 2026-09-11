@@ -26,7 +26,6 @@
 
 | 상태 | feature-id | 요약 |
 |---|---|---|
-| 진행 중 (plan) | `2026-09-11-address-management` | 주소를 User와 별도 엔티티(1:N)로 등록/조회/수정/삭제하는 기본 CRUD |
 
 > `/spec`이 이 표에 새 feature를 `진행 중 (spec)`으로 추가하고, `/review`가 Approve 시 "완료 이력"으로 옮긴다.
 > 상태 라벨: `예정` → `진행 중 (spec)` → 중간 phase는 사람이 갱신 (`(plan)`/`(build)`/`(validate)`) → `/review` Approve → "완료 이력".
@@ -50,6 +49,7 @@ harness 레이어(checkstyle · spotbugs · pitest · archunit · openapi · owa
 | feature-id | verdict | 결과 |
 |---|---|---|
 | `2026-09-10-fix-otp-seed-test-drift` | validate PASS · review Approve | 시드 `otpMethod` drift 해소 — `UserStorageIntegrationTest` 단언 16→14, 교집합 질의 `SKIP`→`SMS`, `otpMethod=SMS` characterization 테스트 추가. `unit` 3f→0, 7/7 AC. should-fix 1(`@DisplayName` follow-up). 커밋 `3ac2f1a`·`1805205` |
+| `2026-09-11-address-management` | validate PASS · review Approve | 주소를 User와 별도 엔티티(1:N, plain FK)로 등록/조회/수정/삭제 + 사용자 삭제 시 cascade 삭제(AC-011). `unit` 39t/0f→71t/0f 회귀 없음, 15/15 AC covered. should-fix 1(AC-012 `@Tag` 누락, 커밋 시 포함). T-001~T-007, 커밋 `d5946e1`~`7111f91` |
 
 ### 구 백로그 (harness 이전 · 자유서술형)
 BL-01~10 은 이 harness 도입 **이전**에 자유서술형 백로그/계획서 방식으로 완료됨.
