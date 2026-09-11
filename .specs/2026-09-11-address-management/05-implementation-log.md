@@ -216,3 +216,64 @@
 - command: `./gradlew test`
 - result: PASS — unchanged (53/53, 0 failures, 0 errors).
 - task status: `done`.
+
+### T-005 — red
+- when: 2026-09-11T17:40:00Z
+- test: `com.keycloak.userstorage.service.AddressServiceImplTest.updateAddress_existingAddressOfOwningUser_replacesAllFieldsAndSaves` — `@Tag("AC-008")`
+- test: `com.keycloak.userstorage.service.AddressServiceImplTest.updateAddress_detailAddressOmitted_overwritesExistingDetailAddressWithNull` — `@Tag("AC-008")`
+- test: `com.keycloak.userstorage.service.AddressServiceImplTest.updateAddress_invalidPostalCode_throws400AndDoesNotSave` — `@Tag("AC-005")`
+- test: `com.keycloak.userstorage.service.AddressServiceImplTest.updateAddress_blankRoadAddress_throws400AndDoesNotSave` — `@Tag("AC-013")`
+- test: `com.keycloak.userstorage.service.AddressServiceImplTest.updateAddress_nonexistentAddressId_throws404AndDoesNotSave` — `@Tag("AC-010")`
+- test: `com.keycloak.userstorage.service.AddressServiceImplTest.updateAddress_addressBelongsToDifferentUser_throws404AndDoesNotSave` — `@Tag("AC-014")`
+- test: `com.keycloak.userstorage.controller.AddressControllerTest.updateAddress_serviceAccepts_returns204` — `@Tag("AC-008")`
+- test: `com.keycloak.userstorage.controller.AddressControllerTest.updateAddress_serviceThrowsBadRequestForPostalCode_returns400` — `@Tag("AC-005")`
+- test: `com.keycloak.userstorage.controller.AddressControllerTest.updateAddress_serviceThrowsBadRequestForRoadAddress_returns400` — `@Tag("AC-013")`
+- test: `com.keycloak.userstorage.controller.AddressControllerTest.updateAddress_serviceThrowsNotFoundForNonexistentAddressId_returns404` — `@Tag("AC-010")`
+- test: `com.keycloak.userstorage.controller.AddressControllerTest.updateAddress_serviceThrowsNotFoundForDifferentOwner_returns404` — `@Tag("AC-014")`
+- unit-test-by-default policy per `04-tasks.md` T-005 notes update (T-005's `files_in_scope` still lists `AddressIntegrationTest.java` from an earlier draft, but per the repo's now-default `spring-unit-testing` policy — see T-004's precedent — both new batches went into the existing `AddressServiceImplTest`/`AddressControllerTest` unit files instead; no integration test added or touched).
+- command: `./gradlew test --tests 'com.keycloak.userstorage.service.AddressServiceImplTest'`
+- command: `./gradlew test --tests 'com.keycloak.userstorage.controller.AddressControllerTest'`
+- result: FAIL (expected) — both invocations fail identically at `:compileTestJava`, not `:test`. `AddressService.updateAddress(String, String, Address)` genuinely does not exist yet in `src/main` — the test-engineer role never edits `src/main/**`, so red for a brand-new interface method is necessarily a compile-time symbol-not-found, same pattern as T-004. All 11 compiler errors (6 in `AddressServiceImplTest`, 5 in `AddressControllerTest`) resolve to the single missing symbol `AddressService.updateAddress(String,String,Address)`; no typos, no unrelated errors. `implementer` adding the method (interface + impl + controller `@PutMapping`) in green turns this into a runtime green. Because `compileTestJava` compiles the whole `src/test/java` source set together regardless of the `--tests` filter, both Gradle invocations produced the identical 11-error listing.
+- excerpt:
+  ```
+  > Task :compileTestJava FAILED
+  .../controller/AddressControllerTest.java:111: error: cannot find symbol
+          verify(addressService).updateAddress(eq(EXISTING_USER_ID), eq(EXISTING_ADDRESS_ID), any(Address.class));
+                                ^
+    symbol:   method updateAddress(String,String,Address)
+    location: interface AddressService
+  .../service/AddressServiceImplTest.java:125: error: cannot find symbol
+          addressService.updateAddress(EXISTING_USER_ID, EXISTING_ADDRESS_ID, submitted);
+                        ^
+    symbol:   method updateAddress(String,String,Address)
+    location: variable addressService of type AddressServiceImpl
+  11 errors total (5 in AddressControllerTest, 6 in AddressServiceImplTest), all resolving to the
+  same missing symbol: AddressService.updateAddress(String, String, Address).
+
+  FAILURE: Build failed with an exception.
+  > Task :compileTestJava FAILED
+  ```
+
+### T-005 — green
+- when: 2026-09-11T17:15:00+09:00
+- files changed:
+  - `src/main/java/com/keycloak/userstorage/service/AddressService.java` — added `void updateAddress(String userId, String addressId, Address address);` to the interface.
+  - `src/main/java/com/keycloak/userstorage/service/AddressServiceImpl.java` — implemented `updateAddress()`: `addressRepository.findByIdAndUserId(addressId, userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "address not found"))` (same lookup pattern as `getAddress()`, covers both AC-010 nonexistent id and AC-014 wrong owner as one code path), then the existing `validate(address)` helper (covers AC-005/AC-013), then full-replace of `postalCode`, `roadAddress`, `detailAddress` on the found entity (detail address included even when the submitted value is `null`, so omission overwrites rather than preserves — matches PUT full-replace semantics, not PATCH), then `addressRepository.save(existing)`. Annotated `@Transactional` like `createAddress()`.
+  - `src/main/java/com/keycloak/userstorage/controller/AddressController.java` — added `@PutMapping("/{addressId}") @Transactional updateAddress(...)` calling the service method and returning `ResponseEntity.noContent().build()` (204, no body).
+- command: `./gradlew test --tests 'com.keycloak.userstorage.service.AddressServiceImplTest' --tests 'com.keycloak.userstorage.controller.AddressControllerTest'`
+- result: PASS — all tests in both classes green (gradle report totals below are the source of truth), 0 failures, 0 errors.
+- command: `./gradlew test`
+- result: PASS — full suite green, no regressions. `AddressServiceImplTest`: 9/0/0/0. `AddressControllerTest`: 8/0/0/0. `AddressIntegrationTest`: 8/0/0/0 (unchanged). `UserStorageIntegrationTest`: 39/0/0/0 (unchanged). Total 64/64, 0 failures, 0 errors.
+
+### T-005 — refactor
+- when: 2026-09-11T17:17:00+09:00
+- change: none — `updateAddress()` reuses the existing `findByIdAndUserId` lookup pattern (identical to `getAddress()`) and the existing `validate()` helper (identical to `createAddress()`); no new duplication introduced. Controller method mirrors the structure of `createAddress()`/`getAddress()`. No extraction or restructuring needed.
+- command: `./gradlew test`
+- result: PASS — unchanged (64/64, 0 failures, 0 errors).
+
+### T-005 — simplify
+- when: 2026-09-11T17:18:00+09:00
+- change: none — `updateAddress()` reads top-to-bottom as a single sequence of guard-then-mutate steps (lookup-or-404 → validate → assign three fields → save), no ternaries or nested conditionals, names (`updateAddress`, `postalCode`, `roadAddress`, `detailAddress`) match `01-spec.md`/`04-tasks.md` glossary terms directly. No edits required.
+- command: `./gradlew test`
+- result: PASS — unchanged (64/64, 0 failures, 0 errors).
+- task status: `done`.

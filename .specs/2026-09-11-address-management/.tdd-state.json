@@ -59,14 +59,18 @@
       "red_failure_excerpt": ":compileTestJava FAILED — 8 compiler errors, all 'cannot find symbol' for AddressService.getAddresses(String) and AddressRepository.findByUserId(String), neither of which exists in src/main yet (test-engineer never edits src/main/**, so red for a new interface method is a compile-time symbol-not-found, not a runtime failure); implementer adds both methods in green. Mid-green blocker (not part of the original red batch): AddressControllerTest (@WebMvcTest, first one in this repo) fails ApplicationContext startup because UserApplication autowires UserRepository/CredentialDataRepository directly for its @PostConstruct seeder, which @WebMvcTest's JPA-autoconfiguration exclusion can't satisfy. User approved expanding files_in_scope to UserApplication.java + new DataInitializer.java to extract the seeder into its own @Component (no runtime behaviour change)."
     },
     "T-005": {
-      "phase": "pending",
+      "phase": "done",
       "acs_covered": ["AC-008", "AC-005", "AC-013", "AC-010", "AC-014"],
       "files_in_scope": [
+        "src/main/java/com/keycloak/userstorage/service/AddressService.java",
         "src/main/java/com/keycloak/userstorage/service/AddressServiceImpl.java",
         "src/main/java/com/keycloak/userstorage/controller/AddressController.java",
-        "src/test/java/com/keycloak/userstorage/integration/AddressIntegrationTest.java"
+        "src/test/java/com/keycloak/userstorage/service/AddressServiceImplTest.java",
+        "src/test/java/com/keycloak/userstorage/controller/AddressControllerTest.java"
       ],
-      "depends_on": ["T-003"]
+      "depends_on": ["T-003"],
+      "red_at": "2026-09-11T17:40:00Z",
+      "red_failure_excerpt": ":compileTestJava FAILED — 11 compiler errors (6 in AddressServiceImplTest, 5 in AddressControllerTest), all 'cannot find symbol' for AddressService.updateAddress(String, String, Address), which does not exist in src/main yet (test-engineer never edits src/main/**, so red for a new interface method is a compile-time symbol-not-found, not a runtime failure, same pattern as T-004). implementer adds updateAddress to AddressService/AddressServiceImpl and a PUT /{addressId} mapping to AddressController in green."
     },
     "T-006": {
       "phase": "pending",

@@ -45,6 +45,18 @@ public class AddressServiceImpl implements AddressService {
         return addressRepository.findByUserId(userId);
     }
 
+    @Override
+    @Transactional
+    public void updateAddress(String userId, String addressId, Address address) {
+        Address existing = addressRepository.findByIdAndUserId(addressId, userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "address not found"));
+        validate(address);
+        existing.setPostalCode(address.getPostalCode());
+        existing.setRoadAddress(address.getRoadAddress());
+        existing.setDetailAddress(address.getDetailAddress());
+        addressRepository.save(existing);
+    }
+
     private void requireUserExists(String userId) {
         if (!userRepository.existsById(userId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found");
