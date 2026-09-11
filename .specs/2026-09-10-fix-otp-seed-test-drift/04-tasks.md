@@ -2,7 +2,7 @@
 
 > Owner: `architect` · Phase 3 · Template: `.claude/templates/tasks.template.md`
 >
-> 테스트 전용 feature. 변경 파일은 `src/test/java/com/keycloak/userstorage/UserStorageIntegrationTest.java` 하나.
+> 테스트 전용 feature. 변경 파일은 `src/test/java/com/keycloak/userstorage/integration/UserStorageIntegrationTest.java` 하나.
 > `src/main/**` 미변경 → `block-impl-without-failing-test` hook 비적용. Red는 `_baseline.json`의
 > 기존 실패 3건이 이미 제공.
 
@@ -20,7 +20,7 @@
 ### T-001: `otpMethod=SKIP` 개수 단언 정합 + 스테일 이름 rename
 - **acs_covered:** AC-001, AC-002, AC-005, AC-007
 - **files_in_scope:**
-  - `src/test/java/com/keycloak/userstorage/UserStorageIntegrationTest.java`
+  - `src/test/java/com/keycloak/userstorage/integration/UserStorageIntegrationTest.java`
 - **depends_on:** none
 - **gates:** unit
 - **estimated_phases:** [red, green]
@@ -38,7 +38,7 @@
 ### T-002: `otpMethod=SMS` 단언 + 필드·속성 교집합 정합
 - **acs_covered:** AC-003, AC-004, AC-006
 - **files_in_scope:**
-  - `src/test/java/com/keycloak/userstorage/UserStorageIntegrationTest.java`
+  - `src/test/java/com/keycloak/userstorage/integration/UserStorageIntegrationTest.java`
 - **depends_on:** T-001
 - **gates:** unit
 - **estimated_phases:** [red, green]

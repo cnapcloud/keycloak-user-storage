@@ -17,7 +17,7 @@ More files ≠ better output. Focused context → fast, accurate work.
 2. 1–2 **reference files** with a similar existing implementation — in full, not summarised. Examples in this repo:
    - dynamic query → `repository/UserRepositoryImpl.java`
    - endpoint + error handling → `controller/UserController.java`
-   - integration test style → `src/test/java/com/keycloak/userstorage/UserStorageIntegrationTest.java`
+   - integration test style → `src/test/java/com/keycloak/userstorage/integration/UserStorageIntegrationTest.java`
 3. Only the type definitions the current task touches (`model/User.java`, `model/CredentialData.java`).
 
 ## Exclude

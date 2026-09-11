@@ -26,7 +26,7 @@
   - `src/main/java/com/keycloak/userstorage/service/AddressService.java`
   - `src/main/java/com/keycloak/userstorage/service/AddressServiceImpl.java`
   - `src/main/java/com/keycloak/userstorage/controller/AddressController.java`
-  - `src/test/java/com/keycloak/userstorage/AddressIntegrationTest.java`
+  - `src/test/java/com/keycloak/userstorage/integration/AddressIntegrationTest.java`
 - **depends_on:** none
 - **gates:** unit, integration, coverage
 - **estimated_phases:** [red, green, refactor, simplify]
@@ -36,7 +36,7 @@
 - **acs_covered:** AC-004, AC-005, AC-013
 - **files_in_scope:**
   - `src/main/java/com/keycloak/userstorage/service/AddressServiceImpl.java`
-  - `src/test/java/com/keycloak/userstorage/AddressIntegrationTest.java`
+  - `src/test/java/com/keycloak/userstorage/integration/AddressIntegrationTest.java`
 - **depends_on:** T-001
 - **gates:** unit, integration, coverage
 - **estimated_phases:** [red, green, refactor, simplify]
@@ -48,7 +48,7 @@
   - `src/main/java/com/keycloak/userstorage/repository/AddressRepository.java`
   - `src/main/java/com/keycloak/userstorage/service/AddressServiceImpl.java`
   - `src/main/java/com/keycloak/userstorage/controller/AddressController.java`
-  - `src/test/java/com/keycloak/userstorage/AddressIntegrationTest.java`
+  - `src/test/java/com/keycloak/userstorage/integration/AddressIntegrationTest.java`
 - **depends_on:** T-001
 - **gates:** unit, integration, coverage
 - **estimated_phases:** [red, green, refactor, simplify]
@@ -59,7 +59,7 @@
 - **files_in_scope:**
   - `src/main/java/com/keycloak/userstorage/service/AddressServiceImpl.java`
   - `src/main/java/com/keycloak/userstorage/controller/AddressController.java`
-  - `src/test/java/com/keycloak/userstorage/AddressIntegrationTest.java`
+  - `src/test/java/com/keycloak/userstorage/integration/AddressIntegrationTest.java`
 - **depends_on:** T-001
 - **gates:** unit, integration, coverage
 - **estimated_phases:** [red, green, refactor, simplify]
@@ -70,7 +70,7 @@
 - **files_in_scope:**
   - `src/main/java/com/keycloak/userstorage/service/AddressServiceImpl.java`
   - `src/main/java/com/keycloak/userstorage/controller/AddressController.java`
-  - `src/test/java/com/keycloak/userstorage/AddressIntegrationTest.java`
+  - `src/test/java/com/keycloak/userstorage/integration/AddressIntegrationTest.java`
 - **depends_on:** T-003
 - **gates:** unit, integration, coverage
 - **estimated_phases:** [red, green, refactor, simplify]
@@ -81,7 +81,7 @@
 - **files_in_scope:**
   - `src/main/java/com/keycloak/userstorage/service/AddressServiceImpl.java`
   - `src/main/java/com/keycloak/userstorage/controller/AddressController.java`
-  - `src/test/java/com/keycloak/userstorage/AddressIntegrationTest.java`
+  - `src/test/java/com/keycloak/userstorage/integration/AddressIntegrationTest.java`
 - **depends_on:** T-003
 - **gates:** unit, integration, coverage
 - **estimated_phases:** [red, green, refactor, simplify]
@@ -92,7 +92,7 @@
 - **files_in_scope:**
   - `src/main/java/com/keycloak/userstorage/service/UserServiceImpl.java`
   - `src/main/java/com/keycloak/userstorage/repository/AddressRepository.java`
-  - `src/test/java/com/keycloak/userstorage/UserStorageIntegrationTest.java`
+  - `src/test/java/com/keycloak/userstorage/integration/UserStorageIntegrationTest.java`
 - **depends_on:** T-001
 - **gates:** unit, integration, coverage
 - **estimated_phases:** [red, green, refactor, simplify]

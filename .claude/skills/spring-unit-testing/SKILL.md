@@ -19,6 +19,12 @@ Do not write a test that exercises Controller through a real Service — that's 
 tests already verify end-to-end. If you need to confirm Controller and Service
 actually wire together correctly, that's what the integration test is for.
 
+## One AC, which layer(s)?
+- Rule/branch decides the outcome → `XxxServiceTest` only.
+- Only routing/response shape is at stake → `XxxControllerTest` only.
+- Both (most ACs here) → both classes, same `@Tag("AC-NNN")`. Not a duplicate —
+  Service test proves the rule fires, Controller test proves it reaches the client.
+
 ## Naming
 `XxxControllerTest` / `XxxServiceTest` (or `XxxServiceImplTest`) — distinct from the
 existing `XxxIntegrationTest` files so the two are never confused at a glance. Same

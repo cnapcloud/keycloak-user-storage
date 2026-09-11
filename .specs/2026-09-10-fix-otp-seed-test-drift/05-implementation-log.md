@@ -9,7 +9,7 @@
 ## T-001 — `otpMethod=SKIP` 개수 단언 정합 + 스테일 이름 rename
 
 acs_covered: AC-001, AC-002, AC-005, AC-007
-files_in_scope: `src/test/java/com/keycloak/userstorage/UserStorageIntegrationTest.java`
+files_in_scope: `src/test/java/com/keycloak/userstorage/integration/UserStorageIntegrationTest.java`
 
 ### red (2026-09-10)
 기존 실패 2건을 실행해 red 상태 확인:
@@ -63,7 +63,7 @@ T-001 `acs_covered` = AC-001·AC-002·AC-005·AC-007 전부 `@Tag` 테스트로 
 ## T-002 — `otpMethod=SMS` 단언 + 필드·속성 교집합 정합
 
 acs_covered: AC-003, AC-004, AC-006
-files_in_scope: `src/test/java/com/keycloak/userstorage/UserStorageIntegrationTest.java`
+files_in_scope: `src/test/java/com/keycloak/userstorage/integration/UserStorageIntegrationTest.java`
 
 ### red (2026-09-10)
 ```

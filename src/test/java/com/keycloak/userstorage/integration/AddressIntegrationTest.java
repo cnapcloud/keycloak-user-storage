@@ -1,4 +1,4 @@
-package com.keycloak.userstorage;
+package com.keycloak.userstorage.integration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

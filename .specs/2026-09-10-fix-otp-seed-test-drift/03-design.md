@@ -9,7 +9,7 @@
   `MultiAttributeEntry` / `USER_ATTRIBUTES` 는 시드 대비 이미 정확히 동작한다 (`_baseline.json`의
   `unit` 실패 3건은 전부 테스트 단언 결함).
 - New/changed packages: 없음.
-- 변경 파일: `src/test/java/com/keycloak/userstorage/UserStorageIntegrationTest.java` 하나.
+- 변경 파일: `src/test/java/com/keycloak/userstorage/integration/UserStorageIntegrationTest.java` 하나.
 - 신규 import: `org.junit.jupiter.api.Tag` (AC 추적용 `@Tag` 도입 — 이 파일 최초).
 - ADRs: ADR-001 (시드를 source-of-truth로, 테스트 단언을 정합).
 

@@ -27,10 +27,10 @@ Follow `tdd-red-green-refactor` skill's "One TDD cycle per task (not per AC)" ru
 
 1. Read the task's **full** `acs_covered` list (every AC for this task, not one at a time).
 2. Default to `spring-unit-testing` (Controller `@WebMvcTest`+mock, Service Mockito) for every AC. Only write a `spring-integration-testing`-style full `@SpringBootTest(RANDOM_PORT)` test when the user has explicitly asked for one for this task — never as the default choice, even for a "happy path" AC.
-3. Write **one test per AC** in `acs_covered`, all in the same test class, in a single pass. Every `@Test` carries **all three** lines in order: `@Test` → `@Tag("AC-NNN")` → `@DisplayName("<task-id>: given <precondition>, when <action>, then <outcome>")`.
-4. Run the whole class once: `./gradlew test --tests 'com.keycloak.userstorage.ClassName'` — not per method.
+3. Pick the layer per AC per `spring-unit-testing`'s "One AC, which layer(s)?". Write the whole batch in one pass, across however many classes it touches. Every `@Test` → `@Tag("AC-NNN")` → `@DisplayName("<task-id>: given <precondition>, when <action>, then <outcome>")`.
+4. Run each touched class once: `./gradlew test --tests 'com.keycloak.userstorage.ClassName'` — not per method, and not the whole suite yet.
 5. Confirm **every** new test fails for the **right reason** (missing behaviour, not a compile error or typo), and that only the newly added methods fail — a pre-existing test failing too means broken test isolation (e.g. shared data), not a regression; fix the new test, never the old one.
-6. Append **one** `red` block to `05-implementation-log.md` listing every new test method + its `@Tag`, one command, one combined excerpt.
+6. Append **one** `red` block to `05-implementation-log.md` listing every new test method + its `@Tag` across every touched class, one Gradle command per class, one combined excerpt.
 7. Update `.tdd-state.json`: `phase: "red"`, `red_at`, `red_failure_excerpt` (summarize across the batch), `files_in_scope`.
 8. Hand off to `implementer`.
 
@@ -58,7 +58,7 @@ Either way, hand back to `implementer` — the "exception" path of "One TDD cycl
 - `null`-value request bodies: send raw JSON strings (Jackson `NON_NULL` drops `Map` null values) — see the testing skill.
 
 ## Handoff to `implementer` only when
-- [ ] One new test per AC in the task's `acs_covered` exists in `files_in_scope` (or, for a gap exception, the one new test exists).
-- [ ] All of them ran in a single class-level Gradle invocation and failed for the right reason.
+- [ ] Every AC has a new test in the layer that decides it — Service, Controller, or both with the same `@Tag` (or one test for a gap exception).
+- [ ] Every touched class ran in its own class-level Gradle invocation and every new test in it failed for the right reason.
 - [ ] `red` block appended to `05-implementation-log.md`.
 - [ ] `.tdd-state.json` shows `phase: "red"`, `red_failure_excerpt` non-empty.
