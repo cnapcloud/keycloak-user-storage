@@ -78,6 +78,7 @@ class AddressIntegrationTest {
 
     @Test
     @Tag("AC-001")
+    @Tag("AC-012")
     @DisplayName("T-001: given an existing user, when POST /user/{userId}/addresses is submitted twice, "
             + "then both addresses are created (1:N, no limit — AC-012)")
     void createAddress_sameUserTwice_bothSucceed() {
