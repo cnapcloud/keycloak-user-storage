@@ -29,7 +29,7 @@
       "red_failure_excerpt": "AC-005/AC-013 fail as expected (400 expected, got 201 — no validation yet); AC-004 already passes from T-001's user-existence check (existing behaviour, kept and tagged, not forced red)"
     },
     "T-003": {
-      "phase": "pending",
+      "phase": "done",
       "acs_covered": ["AC-006", "AC-010", "AC-014"],
       "files_in_scope": [
         "src/main/java/com/keycloak/userstorage/repository/AddressRepository.java",
@@ -37,7 +37,9 @@
         "src/main/java/com/keycloak/userstorage/controller/AddressController.java",
         "src/test/java/com/keycloak/userstorage/AddressIntegrationTest.java"
       ],
-      "depends_on": ["T-001"]
+      "depends_on": ["T-001"],
+      "red_at": "2026-09-11T14:06:32Z",
+      "red_failure_excerpt": "AC-006: expected <200 OK> but was <404 NOT_FOUND> (no GET mapping on AddressController yet); AC-010/AC-014: expected error 'address not found' but got Spring's default 'Not Found' body (route absent, no findByIdAndUserId lookup exists). 3/3 new tests fail as expected; the 5 pre-existing T-001/T-002 tests still pass (8 run, 3 failed)."
     },
     "T-004": {
       "phase": "pending",

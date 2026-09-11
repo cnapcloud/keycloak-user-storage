@@ -4,4 +4,6 @@ import com.keycloak.userstorage.model.Address;
 
 public interface AddressService {
     Address createAddress(String userId, Address address);
+
+    Address getAddress(String userId, String addressId);
 }

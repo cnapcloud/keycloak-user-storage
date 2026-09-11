@@ -34,6 +34,12 @@ public class AddressServiceImpl implements AddressService {
         return addressRepository.save(address);
     }
 
+    @Override
+    public Address getAddress(String userId, String addressId) {
+        return addressRepository.findByIdAndUserId(addressId, userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "address not found"));
+    }
+
     private void validate(Address address) {
         if (address.getPostalCode() == null || !address.getPostalCode().matches("\\d{5}")) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "postal code must be exactly 5 digits");

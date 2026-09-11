@@ -101,3 +101,52 @@
 - command: `./gradlew test`
 - result: PASS — unchanged (44/44).
 - task status: `done`.
+
+### T-003 — red
+- when: 2026-09-11T14:06:32Z
+- test: `com.keycloak.userstorage.AddressIntegrationTest.getAddress_existingAddressOfOwningUser_returns200WithAddressFields` — `@Tag("AC-006")`
+- test: `com.keycloak.userstorage.AddressIntegrationTest.getAddress_nonexistentAddressId_returns404` — `@Tag("AC-010")`
+- test: `com.keycloak.userstorage.AddressIntegrationTest.getAddress_addressBelongsToDifferentUser_returns404` — `@Tag("AC-014")`
+- command: `./gradlew test --tests 'com.keycloak.userstorage.AddressIntegrationTest'`
+- result: FAIL (expected) — 8 tests run (5 pre-existing T-001/T-002 tests + 3 new), 3 failed. No GET mapping exists on `AddressController` yet, so `GET /user/{userId}/addresses/{addressId}` falls through to Spring's default 404 handler regardless of scenario.
+- excerpt:
+  ```
+  getAddress_existingAddressOfOwningUser_returns200WithAddressFields (AC-006) FAILED
+      org.opentest4j.AssertionFailedError: expected: <200 OK> but was: <404 NOT_FOUND>
+          at app//com.keycloak.userstorage.AddressIntegrationTest.getAddress_existingAddressOfOwningUser_returns200WithAddressFields(AddressIntegrationTest.java:169)
+
+  getAddress_nonexistentAddressId_returns404 (AC-010) FAILED
+      org.opentest4j.AssertionFailedError: expected: <address not found> but was: <Not Found>
+          at app//com.keycloak.userstorage.AddressIntegrationTest.getAddress_nonexistentAddressId_returns404(AddressIntegrationTest.java:194)
+
+  getAddress_addressBelongsToDifferentUser_returns404 (AC-014) FAILED
+      org.opentest4j.AssertionFailedError: expected: <address not found> but was: <Not Found>
+          at app//com.keycloak.userstorage.AddressIntegrationTest.getAddress_addressBelongsToDifferentUser_returns404(AddressIntegrationTest.java:216)
+
+  8 tests completed, 3 failed (5 pre-existing T-001/T-002 tests unaffected)
+  ```
+
+### T-003 — green
+- when: 2026-09-11T14:10:00+09:00
+- files changed:
+  - `src/main/java/com/keycloak/userstorage/repository/AddressRepository.java` — added `Optional<Address> findByIdAndUserId(String id, String userId)` derived query; empty result covers both "addressId doesn't exist" and "addressId belongs to a different user" in one lookup.
+  - `src/main/java/com/keycloak/userstorage/service/AddressService.java` — added `Address getAddress(String userId, String addressId)` to the interface.
+  - `src/main/java/com/keycloak/userstorage/service/AddressServiceImpl.java` — implemented `getAddress()`: `addressRepository.findByIdAndUserId(addressId, userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "address not found"))`. No `userRepository.existsById` check added (out of scope for T-003's ACs; deferred to whichever task covers "user not found" for GET, e.g. AC-015/T-004 for the list endpoint).
+  - `src/main/java/com/keycloak/userstorage/controller/AddressController.java` — added `@GetMapping("/{addressId}") getAddress(@PathVariable String userId, @PathVariable String addressId)` returning `ResponseEntity.ok(address)`.
+- command: `./gradlew test --tests 'com.keycloak.userstorage.AddressIntegrationTest'`
+- result: PASS — 8/8 (5 pre-existing T-001/T-002 tests + 3 new: `getAddress_existingAddressOfOwningUser_returns200WithAddressFields`, `getAddress_nonexistentAddressId_returns404`, `getAddress_addressBelongsToDifferentUser_returns404`), 0 failures, 0 errors.
+- command: `./gradlew test`
+- result: PASS — full suite green, no regressions. `AddressIntegrationTest`: 8 tests, 0 failures, 0 errors. `UserStorageIntegrationTest`: 39 tests, 0 failures, 0 errors. Total 47/47.
+
+### T-003 — refactor
+- when: 2026-09-11T14:11:00+09:00
+- change: none — reviewed all four touched files; `getAddress()` is a single-expression method mirroring the existing `orElseThrow` idiom used elsewhere in the codebase, the repository method is a plain derived query, and the controller method mirrors `createAddress()`'s structure. No duplication or misplaced logic found.
+- command: `./gradlew test`
+- result: PASS — unchanged (47/47).
+
+### T-003 — simplify
+- when: 2026-09-11T14:12:00+09:00
+- change: none — `getAddress()` already reads as a single early-return-style expression, no ternaries or nested conditionals, and names (`addressId`, `userId`, `findByIdAndUserId`) match `01-spec.md`/`03-design.md` glossary terms directly. No edits required.
+- command: `./gradlew test`
+- result: PASS — unchanged (47/47).
+- task status: `done`.

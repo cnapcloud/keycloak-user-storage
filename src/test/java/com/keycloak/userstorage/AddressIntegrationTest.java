@@ -44,6 +44,8 @@ class AddressIntegrationTest {
             "{\"postalCode\": \"%s\", \"roadAddress\": \"%s\", \"detailAddress\": \"%s\"}",
             SAMPLE_POSTAL_CODE, BLANK_ROAD_ADDRESS, SAMPLE_DETAIL_ADDRESS);
     private static final String NONEXISTENT_USER_ID = "u-00000000";
+    private static final String NONEXISTENT_ADDRESS_ID = "addr-00000000";
+    private static final String ADDRESS_NOT_FOUND_ERROR = "address not found";
 
     @Autowired
     private TestRestTemplate rest;
@@ -150,6 +152,74 @@ class AddressIntegrationTest {
         }
     }
 
+    @Test
+    @Tag("AC-006")
+    @DisplayName("T-003: given an address that exists and belongs to the user, when GET "
+            + "/user/{userId}/addresses/{addressId} is submitted, then the system responds with 200 and "
+            + "that address's id, user id, postal code, road address, and detail address")
+    void getAddress_existingAddressOfOwningUser_returns200WithAddressFields() {
+        String userId = createTempUser("address-test-user-5");
+        try {
+            String addressId = createTempAddress(userId, SAMPLE_ADDRESS_BODY);
+
+            ResponseEntity<Map<String, Object>> response = rest.exchange(
+                    "/user/" + userId + "/addresses/" + addressId, HttpMethod.GET, null,
+                    new ParameterizedTypeReference<>() {});
+
+            assertEquals(HttpStatus.OK, response.getStatusCode());
+            Map<String, Object> address = response.getBody();
+            assertNotNull(address);
+            assertEquals(addressId, address.get("id"));
+            assertEquals(userId, address.get("userId"));
+            assertEquals(SAMPLE_POSTAL_CODE, address.get("postalCode"));
+            assertEquals(SAMPLE_ROAD_ADDRESS, address.get("roadAddress"));
+            assertEquals(SAMPLE_DETAIL_ADDRESS, address.get("detailAddress"));
+        } finally {
+            rest.delete("/user/" + userId);
+        }
+    }
+
+    @Test
+    @Tag("AC-010")
+    @DisplayName("T-003: given an addressId that does not exist, when GET /user/{userId}/addresses/{addressId} "
+            + "is submitted, then the system responds with 404 and leaves all address data unchanged")
+    void getAddress_nonexistentAddressId_returns404() {
+        String userId = createTempUser("address-test-user-6");
+        try {
+            ResponseEntity<Map<String, Object>> response = rest.exchange(
+                    "/user/" + userId + "/addresses/" + NONEXISTENT_ADDRESS_ID, HttpMethod.GET, null,
+                    new ParameterizedTypeReference<>() {});
+
+            assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+            assertEquals(ADDRESS_NOT_FOUND_ERROR, response.getBody().get("error"));
+        } finally {
+            rest.delete("/user/" + userId);
+        }
+    }
+
+    @Test
+    @Tag("AC-014")
+    @DisplayName("T-003: given an addressId that exists but belongs to a different user, when GET "
+            + "/user/{userId}/addresses/{addressId} is submitted with the other user's id, then the system "
+            + "responds with 404 and leaves all address data unchanged")
+    void getAddress_addressBelongsToDifferentUser_returns404() {
+        String userIdA = createTempUser("address-test-user-7a");
+        String userIdB = createTempUser("address-test-user-7b");
+        try {
+            String addressIdOfA = createTempAddress(userIdA, SAMPLE_ADDRESS_BODY);
+
+            ResponseEntity<Map<String, Object>> response = rest.exchange(
+                    "/user/" + userIdB + "/addresses/" + addressIdOfA, HttpMethod.GET, null,
+                    new ParameterizedTypeReference<>() {});
+
+            assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+            assertEquals(ADDRESS_NOT_FOUND_ERROR, response.getBody().get("error"));
+        } finally {
+            rest.delete("/user/" + userIdA);
+            rest.delete("/user/" + userIdB);
+        }
+    }
+
     // =========================================================================
     // Helpers
     // =========================================================================
@@ -166,5 +236,12 @@ class AddressIntegrationTest {
                 "/user", HttpMethod.POST, jsonEntity(body),
                 new ParameterizedTypeReference<>() {});
         return response.getBody().get("id");
+    }
+
+    private String createTempAddress(String userId, String addressBody) {
+        ResponseEntity<Map<String, Object>> response = rest.exchange(
+                "/user/" + userId + "/addresses", HttpMethod.POST, jsonEntity(addressBody),
+                new ParameterizedTypeReference<>() {});
+        return (String) response.getBody().get("id");
     }
 }
