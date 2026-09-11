@@ -30,9 +30,9 @@ TDD 순서는 hook으로 강제된다 (실패 테스트 없이 `src/main/**` 편
 ## Orchestration
 0. **Pre-flight.** `git status`. 이전 태스크의 미커밋 변경이 있으면 거부 — `git commit → /build <task-id>` 안내.
 1. **Activate.** `.tdd-state.json` `active_task = <task-id>`. 다른 태스크가 TDD phase 중이면 거부 (한 번에 하나).
-2. **Red.** `test-engineer` red step. 완료 시 `phase: "red"` + `red_failure_excerpt` 채워짐 + `05-implementation-log.md`에 `red` 블록.
-3. **Green → Refactor → Simplify.** `implementer`. 각 단계 후 `phase` 전이 + 로그 블록.
-4. **Done.** `phase: "done"`, `active_task` 클리어. 이 태스크의 `acs_covered`에 아직 커버 안 된 AC가 있으면 스텝 2로 루프 (다음 슬라이스).
+2. **Red (배치).** `test-engineer` red step — `tdd-red-green-refactor` skill의 "One TDD cycle per task (not per AC)" 규칙대로 태스크의 `acs_covered` 전체를 한 번에 테스트로 표현(AC마다 별도 `@Test`+`@Tag`)하고 클래스 단위로 gradle 1회 실행해 전부 확인. 완료 시 `phase: "red"` + `red_failure_excerpt` 채워짐 + `05-implementation-log.md`에 red 블록 하나(테스트 목록 전체 포함).
+3. **Green → Refactor → Simplify (배치).** `implementer` — 그 배치 전체를 한 번의 green/refactor/simplify로 처리(각 1회 gradle 실행). 각 단계 후 `phase` 전이 + 로그 블록(태스크당 1개씩).
+4. **Done.** `phase: "done"`, `active_task` 클리어. 정상 흐름은 3번 이후 바로 done(2번의 red가 이미 `acs_covered` 전체를 담음). **예외**: 구현 중 배치에 없던 진짜 새 갭 발견 시 — 기존 AC의 누락 케이스면 그 AC로 태그, 스펙에 없는 새 동작이면 `AC-NNN`을 지어내지 말고 먼저 `01-spec.md`에 정식 추가한 뒤에만 — 테스트 1개를 같은 클래스에 추가해 그 메소드만 국소적으로 red 확인 → green 구현 → **반드시 태스크 전체 테스트 클래스 + 전체 스위트(`./gradlew test`) 재실행으로 최종 확인**한 후에만 다시 done (`tdd-red-green-refactor` skill 규칙 10).
 5. **STOP.** `git status` + 통과 테스트 + 제안 커밋 메시지를 표면화. `git commit → /build <다음 task-id>` 권장. 다음 태스크 자동 시작 금지, 자동 커밋 금지.
 
 ## Refuse if

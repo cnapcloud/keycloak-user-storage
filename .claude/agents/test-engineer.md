@@ -22,17 +22,25 @@ For each `/build` task, write the **failing test(s) first** (red step). Coverage
 ## Skills (항상 참조)
 `usp-integration-testing`, `tdd-red-green-refactor`, `requirements-traceability`
 
-## Process — red step (per task)
-1. Read the task's `acs_covered`.
-2. Choose the smallest scope: plain unit test ≺ Spring slice ≺ full `@SpringBootTest(RANDOM_PORT)` integration test. Match the existing `UserStorageIntegrationTest` style when hitting real endpoints.
-3. Write the smallest test that asserts the AC. Every `@Test` carries **all three** lines in order: `@Test` → `@Tag("AC-NNN")` → `@DisplayName("<task-id>: given <precondition>, when <action>, then <outcome>")`.
-4. Run only that test: `./gradlew test --tests 'com.keycloak.userstorage.ClassName.method'`.
-5. Confirm it fails for the **right reason** (missing behaviour, not a compile error or typo).
-6. Append a `red` block to `05-implementation-log.md` (command + 10-line excerpt).
-7. Update `.tdd-state.json`: `phase: "red"`, `red_at`, `red_failure_excerpt`, `files_in_scope`.
+## Process — red step (per task, batched across all its ACs)
+Follow `tdd-red-green-refactor` skill's "One TDD cycle per task (not per AC)" rules — the **task** is the TDD cycle unit, the AC is only the test unit. Do not loop this whole process once per AC.
+
+1. Read the task's **full** `acs_covered` list (every AC for this task, not one at a time).
+2. Choose the smallest scope per AC: plain unit test ≺ Spring slice ≺ full `@SpringBootTest(RANDOM_PORT)` integration test. Match the existing `UserStorageIntegrationTest` style when hitting real endpoints.
+3. Write **one test per AC** in `acs_covered`, all in the same test class, in a single pass. Every `@Test` carries **all three** lines in order: `@Test` → `@Tag("AC-NNN")` → `@DisplayName("<task-id>: given <precondition>, when <action>, then <outcome>")`.
+4. Run the whole class once: `./gradlew test --tests 'com.keycloak.userstorage.ClassName'` — not per method.
+5. Confirm **every** new test fails for the **right reason** (missing behaviour, not a compile error or typo). Fix any test that fails for the wrong reason before moving on.
+6. Append **one** `red` block to `05-implementation-log.md` listing every new test method + its `@Tag`, one command, one combined excerpt.
+7. Update `.tdd-state.json`: `phase: "red"`, `red_at`, `red_failure_excerpt` (summarize across the batch), `files_in_scope`.
 8. Hand off to `implementer`.
 
-**Gap task (커버리지/traceability 갭 닫기)** — 별도 절차가 아니라 위 red step을 그대로 쓴다.
+**Gap exception (mid-task or post-green)** — a real gap surfaces that wasn't in the original batch:
+- Missed case of an **existing** AC → add one `@Test` tagged with that AC to the same class, run just that method to confirm red.
+- Genuinely new behaviour with **no** AC → do not invent an `AC-NNN`. Halt, append a `Q-NNN` to the task notes, and route to `spec-author` to add a real AC to `01-spec.md` first (the project's "no invention" rule applies here too).
+
+Either way, hand back to `implementer` — the "exception" path of "One TDD cycle per task (not per AC)" requires a full task-class + full-suite re-run before the task can be `done` again, not just the one new method.
+
+**Gap task (커버리지/traceability 갭 닫기, `/validate` 이후)** — 별도 절차가 아니라 위 red step을 그대로 쓴다.
 타깃은 `07-validation-report.md`의 `Gap-NNN`(미커버 라인 / 생존 mutant). 그 코드 경로가 기존 AC를
 교차 검증(triangulation)하면 해당 `@Tag("AC-NNN")`으로 테스트를 추가한다. 대응하는 AC가 전혀 없는 orphan 라인이면
 테스트를 억지로 만들지 말고 `Q-NNN`을 태스크 노트에 붙여 `spec-author`로 반송한다
@@ -50,7 +58,7 @@ For each `/build` task, write the **failing test(s) first** (red step). Coverage
 - `null`-value request bodies: send raw JSON strings (Jackson `NON_NULL` drops `Map` null values) — see the testing skill.
 
 ## Handoff to `implementer` only when
-- [ ] ≥1 new test exists in the task's `files_in_scope`.
-- [ ] It ran and failed for the right reason.
+- [ ] One new test per AC in the task's `acs_covered` exists in `files_in_scope` (or, for a gap exception, the one new test exists).
+- [ ] All of them ran in a single class-level Gradle invocation and failed for the right reason.
 - [ ] `red` block appended to `05-implementation-log.md`.
 - [ ] `.tdd-state.json` shows `phase: "red"`, `red_failure_excerpt` non-empty.
