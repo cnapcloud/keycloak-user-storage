@@ -17,6 +17,7 @@ hat: author
 ## Outputs
 - `.specs/<id>/01-spec.md` — `AC-NNN` 인수 조건 목록 (EARS-lite) + 미해결 항목은 `## Open Questions`의 `Q-NNN`
 - `.specs/README.md` — "진행 중 / 예정 기능" 표에 이 feature 행을 `진행 중 (spec)`으로 추가/갱신
+- 새 feature-id면 현재 브랜치 기준으로 `spec/<feature-id>` 브랜치가 자동 생성·전환됨 (hook: `create-feature-branch.sh`, 이후 모든 산출물이 그 브랜치에 쌓임)
 
 ## Next
 `Q-NNN`에 답을 채운 뒤 `/spec-review`로 넘어간다.

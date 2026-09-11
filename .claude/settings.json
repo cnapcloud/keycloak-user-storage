@@ -43,6 +43,7 @@
       {
         "matcher": "Edit|Write",
         "hooks": [
+          { "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/create-feature-branch.sh" },
           { "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/block-impl-without-failing-test.sh" },
           { "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/enforce-files-in-scope.sh" },
           { "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/block-progress-on-open-questions.sh" }

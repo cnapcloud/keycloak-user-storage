@@ -39,6 +39,7 @@
 
 ## 강제 장치 (hooks — `settings.json`에 등록됨)
 
+- **`create-feature-branch.sh`** — `/spec`이 새 `.specs/<feature-id>/01-spec.md`를 처음 쓰는 시점에, 현재 브랜치 기준으로 `spec/<feature-id>` 브랜치를 자동 생성·전환한다. `--continue`로 기존 spec을 이어 쓸 때는 파일이 이미 있으므로 동작하지 않는다. 게이트가 아니라 자동화라 git 실패 시에도 Write를 막지 않고 현재 브랜치에 경고만 남긴다.
 - **`block-impl-without-failing-test.sh`** — 실패 테스트(`.tdd-state.json` phase=red + `red_failure_excerpt`) 없이 `src/main/**` 수정 불가.
 - **`enforce-files-in-scope.sh`** — 활성 태스크의 `files_in_scope` 밖 `src/**` 편집 불가.
 - **`block-progress-on-open-questions.sh`** — 활성 feature에 미해결 `Q-NNN`이 있으면 `src/**` 편집 불가.

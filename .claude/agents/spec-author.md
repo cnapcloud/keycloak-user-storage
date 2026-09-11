@@ -32,6 +32,7 @@ model: sonnet
 
 ## Process — author hat (Phase 1, specify)
 1. `<feature-id>` 도출 (`YYYY-MM-DD-<kebab-title>`). 폴더가 이미 있으면 `--continue` 없는 한 거부.
+   `01-spec.md`를 처음 쓰는 순간 `create-feature-branch.sh` 훅이 현재 브랜치에서 `spec/<feature-id>` 브랜치를 자동 생성·전환한다 — 이 agent가 직접 git을 다루지 않는다(Bash 툴 없음).
 2. **소스 수집.** `## Source`에 verbatim 인용. 요구사항을 절대 의역하지 않는다.
 3. 추출: 비즈니스 목표, 주요 행위자, in-scope, 명시적 out-of-scope.
 4. **도메인 / 데이터 인테이크** (이 백엔드 서비스에서 UI 질문은 범위 밖):
