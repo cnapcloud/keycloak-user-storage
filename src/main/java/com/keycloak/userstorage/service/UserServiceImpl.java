@@ -92,7 +92,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public User createUser(User user) {
-        if (userRepository.findByUsername(user.getUsername()).isEmpty()) {
+        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "user already exists");
         }
         user.setId("u-" + UUID.randomUUID().toString().replace("-", "").substring(0, 8));
