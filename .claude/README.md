@@ -62,5 +62,5 @@ checkstyle/spotbugs/archunit/mutation/openapi/owasp는 `skipped` — 설정 패�
 
 구 `.claude/{rules,conventions,backlogs,plans}/`는 이 구조로 흡수되었다:
 - `rules/` → `docs/methodology.md` + `skills/{vertical-slicing,context-curation,openapi-contract-first}/`
-- `conventions/` → `skills/{spring-layer-conventions,spring-error-handling,spring-logging,usp-integration-testing}/`
+- `conventions/` → `skills/{spring-layer-conventions,spring-error-handling,spring-logging,spring-integration-testing}/` (`spring-integration-testing`는 이후 `usp-integration-testing`에서 일반 Spring 패턴/프로젝트 도메인 불변식을 분리 표기하며 개명됨)
 - `backlogs/` + `plans/` → `.specs/README.md` "완료 이력" 표 (상세는 git history)

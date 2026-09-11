@@ -20,13 +20,13 @@ For each `/build` task, write the **failing test(s) first** (red step). Coverage
 - `.specs/<id>/.tdd-state.json`.
 
 ## Skills (항상 참조)
-`usp-integration-testing`, `tdd-red-green-refactor`, `requirements-traceability`
+`spring-integration-testing`, `spring-unit-testing`, `tdd-red-green-refactor`, `requirements-traceability`
 
 ## Process — red step (per task, batched across all its ACs)
 Follow `tdd-red-green-refactor` skill's "One TDD cycle per task (not per AC)" rules — the **task** is the TDD cycle unit, the AC is only the test unit. Do not loop this whole process once per AC.
 
 1. Read the task's **full** `acs_covered` list (every AC for this task, not one at a time).
-2. Choose the smallest scope per AC: plain unit test ≺ Spring slice ≺ full `@SpringBootTest(RANDOM_PORT)` integration test. Match the existing `UserStorageIntegrationTest` style when hitting real endpoints.
+2. Default to `spring-unit-testing` (Controller `@WebMvcTest`+mock, Service Mockito) for every AC. Only write a `spring-integration-testing`-style full `@SpringBootTest(RANDOM_PORT)` test when the user has explicitly asked for one for this task — never as the default choice, even for a "happy path" AC.
 3. Write **one test per AC** in `acs_covered`, all in the same test class, in a single pass. Every `@Test` carries **all three** lines in order: `@Test` → `@Tag("AC-NNN")` → `@DisplayName("<task-id>: given <precondition>, when <action>, then <outcome>")`.
 4. Run the whole class once: `./gradlew test --tests 'com.keycloak.userstorage.ClassName'` — not per method.
 5. Confirm **every** new test fails for the **right reason** (missing behaviour, not a compile error or typo), and that only the newly added methods fail — a pre-existing test failing too means broken test isolation (e.g. shared data), not a regression; fix the new test, never the old one.
