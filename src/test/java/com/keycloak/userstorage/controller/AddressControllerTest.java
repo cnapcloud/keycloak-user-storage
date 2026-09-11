@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -177,6 +178,43 @@ class AddressControllerTest {
         mockMvc.perform(put("/user/" + OTHER_USER_ID + "/addresses/" + EXISTING_ADDRESS_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("address not found"));
+    }
+
+    @Test
+    @Tag("AC-009")
+    @DisplayName("T-006: given the service accepts the delete, when DELETE /user/{userId}/addresses/{addressId}, "
+            + "then 204 with no body and the service is called with the path ids")
+    void deleteAddress_serviceAccepts_returns204() throws Exception {
+        mockMvc.perform(delete("/user/" + EXISTING_USER_ID + "/addresses/" + EXISTING_ADDRESS_ID))
+                .andExpect(status().isNoContent());
+
+        verify(addressService).deleteAddress(eq(EXISTING_USER_ID), eq(EXISTING_ADDRESS_ID));
+    }
+
+    @Test
+    @Tag("AC-010")
+    @DisplayName("T-006: given the service throws 404 for a nonexistent addressId, when DELETE, "
+            + "then the controller returns 404 with the error body")
+    void deleteAddress_serviceThrowsNotFoundForNonexistentAddressId_returns404() throws Exception {
+        doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "address not found"))
+                .when(addressService).deleteAddress(anyString(), anyString());
+
+        mockMvc.perform(delete("/user/" + EXISTING_USER_ID + "/addresses/" + NONEXISTENT_ADDRESS_ID))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("address not found"));
+    }
+
+    @Test
+    @Tag("AC-014")
+    @DisplayName("T-006: given the service throws 404 because the address belongs to a different user, when DELETE, "
+            + "then the controller returns 404 with the error body")
+    void deleteAddress_serviceThrowsNotFoundForDifferentOwner_returns404() throws Exception {
+        doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND, "address not found"))
+                .when(addressService).deleteAddress(anyString(), anyString());
+
+        mockMvc.perform(delete("/user/" + OTHER_USER_ID + "/addresses/" + EXISTING_ADDRESS_ID))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("address not found"));
     }

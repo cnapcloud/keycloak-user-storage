@@ -73,14 +73,18 @@
       "red_failure_excerpt": ":compileTestJava FAILED — 11 compiler errors (6 in AddressServiceImplTest, 5 in AddressControllerTest), all 'cannot find symbol' for AddressService.updateAddress(String, String, Address), which does not exist in src/main yet (test-engineer never edits src/main/**, so red for a new interface method is a compile-time symbol-not-found, not a runtime failure, same pattern as T-004). implementer adds updateAddress to AddressService/AddressServiceImpl and a PUT /{addressId} mapping to AddressController in green."
     },
     "T-006": {
-      "phase": "pending",
+      "phase": "done",
       "acs_covered": ["AC-009", "AC-010", "AC-014"],
       "files_in_scope": [
+        "src/main/java/com/keycloak/userstorage/service/AddressService.java",
         "src/main/java/com/keycloak/userstorage/service/AddressServiceImpl.java",
         "src/main/java/com/keycloak/userstorage/controller/AddressController.java",
-        "src/test/java/com/keycloak/userstorage/integration/AddressIntegrationTest.java"
+        "src/test/java/com/keycloak/userstorage/service/AddressServiceImplTest.java",
+        "src/test/java/com/keycloak/userstorage/controller/AddressControllerTest.java"
       ],
-      "depends_on": ["T-003"]
+      "depends_on": ["T-003"],
+      "red_at": "2026-09-11T18:05:00Z",
+      "red_failure_excerpt": ":compileTestJava FAILED — 6 compiler errors (3 in AddressServiceImplTest, 3 in AddressControllerTest), all 'cannot find symbol' for AddressService.deleteAddress(String, String), which does not exist in src/main yet (test-engineer never edits src/main/**, so red for a new interface method is a compile-time symbol-not-found, not a runtime failure, same pattern as T-004/T-005). implementer adds deleteAddress to AddressService/AddressServiceImpl (reusing findByIdAndUserId for 404, then addressRepository.deleteById) and a DELETE /{addressId} mapping to AddressController in green."
     },
     "T-007": {
       "phase": "pending",

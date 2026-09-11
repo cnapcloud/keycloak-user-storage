@@ -277,3 +277,67 @@
 - command: `./gradlew test`
 - result: PASS — unchanged (64/64, 0 failures, 0 errors).
 - task status: `done`.
+
+### T-006 — red
+- when: 2026-09-11T18:05:00Z
+- test: `com.keycloak.userstorage.service.AddressServiceImplTest.deleteAddress_existingAddressOfOwningUser_deletesRecord` — `@Tag("AC-009")`
+- test: `com.keycloak.userstorage.service.AddressServiceImplTest.deleteAddress_nonexistentAddressId_throws404AndDoesNotDelete` — `@Tag("AC-010")`
+- test: `com.keycloak.userstorage.service.AddressServiceImplTest.deleteAddress_addressBelongsToDifferentUser_throws404AndDoesNotDelete` — `@Tag("AC-014")`
+- test: `com.keycloak.userstorage.controller.AddressControllerTest.deleteAddress_serviceAccepts_returns204` — `@Tag("AC-009")`
+- test: `com.keycloak.userstorage.controller.AddressControllerTest.deleteAddress_serviceThrowsNotFoundForNonexistentAddressId_returns404` — `@Tag("AC-010")`
+- test: `com.keycloak.userstorage.controller.AddressControllerTest.deleteAddress_serviceThrowsNotFoundForDifferentOwner_returns404` — `@Tag("AC-014")`
+- unit-test-by-default policy per repo's now-default `spring-unit-testing` policy (T-004/T-005 precedent) — T-006's `files_in_scope` in `04-tasks.md` still lists `AddressIntegrationTest.java` from an earlier draft, but both new batches went into the existing `AddressServiceImplTest`/`AddressControllerTest` unit files instead; no integration test added or touched. `files_in_scope` corrected in `.tdd-state.json` to reflect the two unit test files actually touched.
+- command: `./gradlew test --tests 'com.keycloak.userstorage.service.AddressServiceImplTest'`
+- command: `./gradlew test --tests 'com.keycloak.userstorage.controller.AddressControllerTest'`
+- result: FAIL (expected) — both invocations fail identically at `:compileTestJava`, not `:test`. `AddressService.deleteAddress(String, String)` genuinely does not exist yet in `src/main` — the test-engineer role never edits `src/main/**`, so red for a brand-new interface method is necessarily a compile-time symbol-not-found, same pattern as T-004/T-005. All 6 compiler errors (3 in `AddressServiceImplTest`, 3 in `AddressControllerTest`) resolve to the single missing symbol `AddressService.deleteAddress(String,String)`; no typos, no unrelated errors. `implementer` adding the method (interface + impl reusing `findByIdAndUserId` + `addressRepository.deleteById` + controller `@DeleteMapping`) in green turns this into a runtime green. Because `compileTestJava` compiles the whole `src/test/java` source set together regardless of the `--tests` filter, both Gradle invocations produced the identical 6-error listing.
+- excerpt:
+  ```
+  > Task :compileTestJava FAILED
+  .../controller/AddressControllerTest.java:193: error: cannot find symbol
+          verify(addressService).deleteAddress(eq(EXISTING_USER_ID), eq(EXISTING_ADDRESS_ID));
+                                ^
+    symbol:   method deleteAddress(String,String)
+    location: interface AddressService
+  .../service/AddressServiceImplTest.java:270: error: cannot find symbol
+          addressService.deleteAddress(EXISTING_USER_ID, EXISTING_ADDRESS_ID);
+                        ^
+    symbol:   method deleteAddress(String,String)
+    location: variable addressService of type AddressServiceImpl
+  6 errors total (3 in AddressControllerTest, 3 in AddressServiceImplTest), all resolving to the
+  same missing symbol: AddressService.deleteAddress(String, String).
+
+  FAILURE: Build failed with an exception.
+  > Task :compileTestJava FAILED
+  ```
+
+### T-006 — green
+- when: 2026-09-11T18:24:00+09:00
+- files changed:
+  - `src/main/java/com/keycloak/userstorage/service/AddressService.java` — added `void deleteAddress(String userId, String addressId);` to the interface.
+  - `src/main/java/com/keycloak/userstorage/service/AddressServiceImpl.java` — implemented `deleteAddress()`: `addressRepository.findByIdAndUserId(addressId, userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "address not found"))` (same lookup pattern as `getAddress()`/`updateAddress()`, covers both AC-010 nonexistent id and AC-014 wrong owner as one code path), then `addressRepository.deleteById(existing.getId())`. Annotated `@Transactional` like `createAddress()`/`updateAddress()`.
+  - `src/main/java/com/keycloak/userstorage/controller/AddressController.java` — added `@DeleteMapping("/{addressId}") @Transactional deleteAddress(...)` calling the service method and returning `ResponseEntity.noContent().build()` (204, no body).
+- command: `./gradlew test --tests 'com.keycloak.userstorage.service.AddressServiceImplTest' --tests 'com.keycloak.userstorage.controller.AddressControllerTest'`
+- result: PASS — all tests in both classes green, including all 6 new T-006 tests (`AddressServiceImplTest.deleteAddress_existingAddressOfOwningUser_deletesRecord`, `deleteAddress_nonexistentAddressId_throws404AndDoesNotDelete`, `deleteAddress_addressBelongsToDifferentUser_throws404AndDoesNotDelete`; `AddressControllerTest.deleteAddress_serviceAccepts_returns204`, `deleteAddress_serviceThrowsNotFoundForNonexistentAddressId_returns404`, `deleteAddress_serviceThrowsNotFoundForDifferentOwner_returns404`). `AddressServiceImplTest`: 11/0/0/0. `AddressControllerTest`: 11/0/0/0. 0 failures, 0 errors.
+- command: `./gradlew test`
+- result: **FAIL — pre-existing regression unrelated to T-006, not fixed (out of `files_in_scope`)**. 70 tests completed, 14 failed. Root cause: `src/main/java/com/keycloak/userstorage/service/UserServiceImpl.java:95` — the duplicate-username guard in `createUser()` reads `if (userRepository.findByUsername(user.getUsername()).isEmpty()) { throw new ResponseStatusException(HttpStatus.CONFLICT, "user already exists"); }`. This is inverted: it throws 409 when the username does **not** already exist (i.e. on every legitimate new-user creation) and instead allows the save to proceed when the username **does** already exist (which then hits the DB unique constraint and surfaces as a 500). This line is untouched by T-006 and sits in a file outside T-006's `files_in_scope` (`AddressService.java`, `AddressServiceImpl.java`, `AddressController.java`, `AddressServiceImplTest.java`, `AddressControllerTest.java` only) — editing `UserServiceImpl.java` here would be out of scope and hook-blocked.
+  - Directly caused (3): `UserStorageIntegrationTest.createUser_success_returns201WithIdUsernameEmail` (expected 201, got 409), `createUser_attributesEmpty_returns201` (expected 201, got 409), `createUser_duplicateUsername_returns409` (expected 409, got 500 — the inverted branch lets the actual duplicate through to the DB, which throws a constraint violation instead of the intended controlled 409).
+  - Cascaded from the above within the same `@SpringBootTest` class, whose later tests depend on users successfully created by earlier ones or by shared setup (5): `deleteUser_success_returns204AndUserGone` (404 instead of 204 — the user it expected to delete was never created), `patchMultiAttributes_multipleValues_storedAsIndividualEntries` (404), `patchMultiAttributes_rePatch_replacesOnlyTargetKey`, `patchMultiAttributes_emptyListRemovesKey`, `patchMultiAttributes_singleValue_storedCorrectly`, `patchMultiAttributes_doesNotAffectSingleValueAttributes` (NullPointerException on null `attrs`/`multiAttrs` — same missing-setup-user cause).
+  - Cascaded into `AddressIntegrationTest` (5): `POST /user/{userId}/addresses` (happy path, x1:N, both validation-failure cases) and `GET /user/{userId}/addresses/{addressId}` (happy path) all fail with 404 instead of their expected status, because `AddressIntegrationTest`'s setup helper (line 236: `rest.exchange("/user", HttpMethod.POST, ...)`) itself calls the now-broken `POST /user` to provision its test user; that call now returns 409 instead of 201, so the user the address tests expect to exist is never created.
+  - This is a single-root-cause regression (one inverted boolean on one line) that fans out to 14 test failures across two integration classes purely through shared setup dependency, not 14 independent bugs.
+- Per the process's hard rule ("if a test that wasn't added by this task fails after the change, that's a regression — fix the implementation, never the old test") and the explicit scope boundary (`files_in_scope` excludes `UserServiceImpl.java`), this fix is not made here. `T-006`'s own 6 new tests are green; `.tdd-state.json` `T-006.phase` is set to `green`, not advanced past that (refactor/simplify below apply only to the T-006-owned files) — **task is not marked `done`** and is not eligible for `/validate` until this regression is resolved by the user's decision (see final report).
+- **Update (2026-09-11, post drill)**: the coordinator confirmed the `UserServiceImpl.createUser` regression above was a deliberate drill (commit `42a76a4`), since reverted via `git revert` (commit `8775d13`); `UserServiceImpl.java:95` is back to `.isPresent()`. Re-ran `./gradlew test` after the revert: **PASS — 70/70, 0 failures, 0 errors** (`AddressServiceImplTest` 12/0/0/0, `AddressControllerTest` 11/0/0/0, `AddressIntegrationTest` 8/0/0/0, `UserStorageIntegrationTest` 39/0/0/0). No regression remains; see updated task status in the simplify block below.
+
+### T-006 — refactor
+- when: 2026-09-11T18:30:00+09:00
+- change: `src/main/java/com/keycloak/userstorage/service/AddressServiceImpl.java` — `getAddress()`, `updateAddress()`, and `deleteAddress()` each had an identical `addressRepository.findByIdAndUserId(addressId, userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "address not found"))` lookup (the third occurrence introduced by this task's `deleteAddress()`). Extracted into a private `Address requireOwnedAddress(String userId, String addressId)` method, mirroring the existing `requireUserExists()` naming/shape; all three call sites now call it directly. No behaviour change — same lookup, same exception type, same status, same message, same call order relative to the rest of each method.
+- command: `./gradlew test --tests 'com.keycloak.userstorage.service.AddressServiceImplTest' --tests 'com.keycloak.userstorage.controller.AddressControllerTest'`
+- result: PASS — unchanged (`AddressServiceImplTest`: 12/0/0/0, `AddressControllerTest`: 11/0/0/0).
+- command: `./gradlew test`
+- result: FAIL (at the time) — unchanged, same pre-existing `UserServiceImpl` regression as the green step above, same failure counts (`AddressServiceImplTest` 12/0/0/0, `AddressControllerTest` 11/0/0/0, `AddressIntegrationTest` 8 total/5 failed (unchanged), `UserStorageIntegrationTest` 39 total/9 failed (unchanged)). Confirms this refactor introduced no new regressions on top of the pre-existing one. **Update: the pre-existing regression was a reverted drill (see green block); re-ran after the revert and the full suite is 70/70 PASS, 0 failures, 0 errors.**
+
+### T-006 — simplify
+- when: 2026-09-11T18:31:00+09:00
+- change: none beyond the refactor above — reviewed `AddressService`, `AddressServiceImpl`, `AddressController`. No ternaries, no nesting beyond single guard clauses, no dead options; names (`deleteAddress`, `requireOwnedAddress`) match `01-spec.md`/`04-tasks.md` glossary terms directly (`deleteAddress` mirrors `createAddress`/`updateAddress`/`getAddress`). No further edits required.
+- command: `./gradlew test`
+- result: PASS — 70/70, 0 failures, 0 errors, after the drill regression was reverted (commit `8775d13`) and the suite re-run. T-006's own files remain fully green; no regressions anywhere in the suite.
+- task status: **`done`**. T-006's own 6 ACs (AC-009, AC-010, AC-014) are implemented, green, refactored, and simplified; the full-suite run is clean.

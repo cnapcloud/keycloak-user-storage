@@ -12,4 +12,6 @@ public interface AddressService {
     List<Address> getAddresses(String userId);
 
     void updateAddress(String userId, String addressId, Address address);
+
+    void deleteAddress(String userId, String addressId);
 }

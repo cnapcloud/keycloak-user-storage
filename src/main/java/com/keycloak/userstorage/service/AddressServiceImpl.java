@@ -35,8 +35,7 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public Address getAddress(String userId, String addressId) {
-        return addressRepository.findByIdAndUserId(addressId, userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "address not found"));
+        return requireOwnedAddress(userId, addressId);
     }
 
     @Override
@@ -48,8 +47,7 @@ public class AddressServiceImpl implements AddressService {
     @Override
     @Transactional
     public void updateAddress(String userId, String addressId, Address address) {
-        Address existing = addressRepository.findByIdAndUserId(addressId, userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "address not found"));
+        Address existing = requireOwnedAddress(userId, addressId);
         validate(address);
         existing.setPostalCode(address.getPostalCode());
         existing.setRoadAddress(address.getRoadAddress());
@@ -57,10 +55,22 @@ public class AddressServiceImpl implements AddressService {
         addressRepository.save(existing);
     }
 
+    @Override
+    @Transactional
+    public void deleteAddress(String userId, String addressId) {
+        Address existing = requireOwnedAddress(userId, addressId);
+        addressRepository.deleteById(existing.getId());
+    }
+
     private void requireUserExists(String userId) {
         if (!userRepository.existsById(userId)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found");
         }
+    }
+
+    private Address requireOwnedAddress(String userId, String addressId) {
+        return addressRepository.findByIdAndUserId(addressId, userId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "address not found"));
     }
 
     private void validate(Address address) {

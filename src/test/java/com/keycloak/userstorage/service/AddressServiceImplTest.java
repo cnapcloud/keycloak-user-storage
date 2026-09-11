@@ -252,4 +252,55 @@ class AddressServiceImplTest {
         assertEquals("address not found", ex.getReason());
         verify(addressRepository, never()).save(any(Address.class));
     }
+
+    @Test
+    @Tag("AC-009")
+    @DisplayName("T-006: given an existing address owned by the user, when deleteAddress, "
+            + "then the address record is removed")
+    void deleteAddress_existingAddressOfOwningUser_deletesRecord() {
+        Address existing = new Address();
+        existing.setId(EXISTING_ADDRESS_ID);
+        existing.setUserId(EXISTING_USER_ID);
+        existing.setPostalCode(SAMPLE_POSTAL_CODE);
+        existing.setRoadAddress(SAMPLE_ROAD_ADDRESS);
+
+        when(addressRepository.findByIdAndUserId(EXISTING_ADDRESS_ID, EXISTING_USER_ID))
+                .thenReturn(Optional.of(existing));
+
+        addressService.deleteAddress(EXISTING_USER_ID, EXISTING_ADDRESS_ID);
+
+        verify(addressRepository).deleteById(EXISTING_ADDRESS_ID);
+    }
+
+    @Test
+    @Tag("AC-010")
+    @DisplayName("T-006: given an addressId that does not exist, when deleteAddress, "
+            + "then the system throws 404 and does not delete any record")
+    void deleteAddress_nonexistentAddressId_throws404AndDoesNotDelete() {
+        when(addressRepository.findByIdAndUserId(NONEXISTENT_ADDRESS_ID, EXISTING_USER_ID))
+                .thenReturn(Optional.empty());
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+                () -> addressService.deleteAddress(EXISTING_USER_ID, NONEXISTENT_ADDRESS_ID));
+
+        assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
+        assertEquals("address not found", ex.getReason());
+        verify(addressRepository, never()).deleteById(any());
+    }
+
+    @Test
+    @Tag("AC-014")
+    @DisplayName("T-006: given an addressId that belongs to a different user, when deleteAddress, "
+            + "then the system throws 404 and does not delete any record")
+    void deleteAddress_addressBelongsToDifferentUser_throws404AndDoesNotDelete() {
+        when(addressRepository.findByIdAndUserId(EXISTING_ADDRESS_ID, OTHER_USER_ID))
+                .thenReturn(Optional.empty());
+
+        ResponseStatusException ex = assertThrows(ResponseStatusException.class,
+                () -> addressService.deleteAddress(OTHER_USER_ID, EXISTING_ADDRESS_ID));
+
+        assertEquals(HttpStatus.NOT_FOUND, ex.getStatusCode());
+        assertEquals("address not found", ex.getReason());
+        verify(addressRepository, never()).deleteById(any());
+    }
 }

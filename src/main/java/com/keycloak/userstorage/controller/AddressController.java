@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -50,6 +51,13 @@ public class AddressController {
     public ResponseEntity<Void> updateAddress(@PathVariable String userId, @PathVariable String addressId,
             @RequestBody Address address) {
         addressService.updateAddress(userId, addressId, address);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{addressId}")
+    @Transactional
+    public ResponseEntity<Void> deleteAddress(@PathVariable String userId, @PathVariable String addressId) {
+        addressService.deleteAddress(userId, addressId);
         return ResponseEntity.noContent().build();
     }
 }
