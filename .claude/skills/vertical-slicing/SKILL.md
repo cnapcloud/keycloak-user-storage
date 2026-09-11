@@ -8,9 +8,12 @@ Break work into tasks that are each **complete and independently testable**, not
 
 Instead of "build all repositories, then all services, then all controllers", do:
 ```
-T-001 (≈2 h): DELETE /user/{id} — repo delete + service + controller 204/404 + integration test
+T-001 (≈2 h): DELETE /user/{id} — repo delete + service + controller 204/404 + unit tests
 T-002 (≈2 h): 404 path + error envelope + test
 ```
+
+Test type default is `spring-unit-testing` (layer-isolated Controller/Service tests) — `spring-integration-testing`
+is opt-in only, write one only when explicitly asked for that task.
 
 ## Size guide
 | Estimate | Assessment |
