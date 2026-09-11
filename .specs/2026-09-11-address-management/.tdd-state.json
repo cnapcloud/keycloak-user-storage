@@ -42,14 +42,21 @@
       "red_failure_excerpt": "AC-006: expected <200 OK> but was <404 NOT_FOUND> (no GET mapping on AddressController yet); AC-010/AC-014: expected error 'address not found' but got Spring's default 'Not Found' body (route absent, no findByIdAndUserId lookup exists). 3/3 new tests fail as expected; the 5 pre-existing T-001/T-002 tests still pass (8 run, 3 failed)."
     },
     "T-004": {
-      "phase": "pending",
+      "phase": "done",
       "acs_covered": ["AC-007", "AC-015"],
       "files_in_scope": [
+        "src/main/java/com/keycloak/userstorage/service/AddressService.java",
         "src/main/java/com/keycloak/userstorage/service/AddressServiceImpl.java",
+        "src/main/java/com/keycloak/userstorage/repository/AddressRepository.java",
         "src/main/java/com/keycloak/userstorage/controller/AddressController.java",
-        "src/test/java/com/keycloak/userstorage/integration/AddressIntegrationTest.java"
+        "src/test/java/com/keycloak/userstorage/service/AddressServiceImplTest.java",
+        "src/test/java/com/keycloak/userstorage/controller/AddressControllerTest.java",
+        "src/main/java/com/keycloak/userstorage/UserApplication.java",
+        "src/main/java/com/keycloak/userstorage/DataInitializer.java"
       ],
-      "depends_on": ["T-001"]
+      "depends_on": ["T-001"],
+      "red_at": "2026-09-11T15:05:00Z",
+      "red_failure_excerpt": ":compileTestJava FAILED — 8 compiler errors, all 'cannot find symbol' for AddressService.getAddresses(String) and AddressRepository.findByUserId(String), neither of which exists in src/main yet (test-engineer never edits src/main/**, so red for a new interface method is a compile-time symbol-not-found, not a runtime failure); implementer adds both methods in green. Mid-green blocker (not part of the original red batch): AddressControllerTest (@WebMvcTest, first one in this repo) fails ApplicationContext startup because UserApplication autowires UserRepository/CredentialDataRepository directly for its @PostConstruct seeder, which @WebMvcTest's JPA-autoconfiguration exclusion can't satisfy. User approved expanding files_in_scope to UserApplication.java + new DataInitializer.java to extract the seeder into its own @Component (no runtime behaviour change)."
     },
     "T-005": {
       "phase": "pending",

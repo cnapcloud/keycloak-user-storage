@@ -1,9 +1,13 @@
 package com.keycloak.userstorage.service;
 
+import java.util.List;
+
 import com.keycloak.userstorage.model.Address;
 
 public interface AddressService {
     Address createAddress(String userId, Address address);
 
     Address getAddress(String userId, String addressId);
+
+    List<Address> getAddresses(String userId);
 }

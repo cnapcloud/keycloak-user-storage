@@ -150,3 +150,69 @@
 - command: `./gradlew test`
 - result: PASS — unchanged (47/47).
 - task status: `done`.
+
+### T-004 — red
+- when: 2026-09-11T15:05:00Z
+- test: `com.keycloak.userstorage.service.AddressServiceImplTest.getAddresses_existingUserWithAddresses_returnsAllAddresses` — `@Tag("AC-007")`
+- test: `com.keycloak.userstorage.service.AddressServiceImplTest.getAddresses_existingUserWithNoAddresses_returnsEmptyList` — `@Tag("AC-007")`
+- test: `com.keycloak.userstorage.service.AddressServiceImplTest.getAddresses_nonexistentUser_throws404` — `@Tag("AC-015")`
+- test: `com.keycloak.userstorage.controller.AddressControllerTest.getAddresses_serviceReturnsAddresses_returns200WithList` — `@Tag("AC-007")`
+- test: `com.keycloak.userstorage.controller.AddressControllerTest.getAddresses_serviceReturnsEmptyList_returns200WithEmptyArray` — `@Tag("AC-007")`
+- test: `com.keycloak.userstorage.controller.AddressControllerTest.getAddresses_serviceThrows404_returns404` — `@Tag("AC-015")`
+- first task on this feature using the `spring-unit-testing` layer-isolated convention (both files are new; no prior `AddressServiceImplTest`/`AddressControllerTest`).
+- command: `./gradlew test --tests 'com.keycloak.userstorage.service.AddressServiceImplTest'`
+- command: `./gradlew test --tests 'com.keycloak.userstorage.controller.AddressControllerTest'`
+- result: FAIL (expected) — `:compileTestJava` fails, not `:test`. Per `04-tasks.md` T-004 notes, `AddressService.getAddresses(String)` and `AddressRepository.findByUserId(String)` genuinely do not exist in `src/main` yet — the test-engineer role never edits `src/main/**`, so red for a brand-new interface method is necessarily a compile-time symbol-not-found, not a runtime assertion failure. Every one of the 8 compiler errors resolves to exactly these two missing symbols (no typos, no unrelated errors); `implementer` adding both methods in green is what turns this into a runtime green. Because `compileTestJava` compiles the whole `src/test/java` source set together regardless of the `--tests` filter, both Gradle invocations produced the identical 8-error listing.
+- excerpt:
+  ```
+  > Task :compileTestJava FAILED
+  .../controller/AddressControllerTest.java:55: error: cannot find symbol
+          when(addressService.getAddresses(EXISTING_USER_ID)).thenReturn(List.of(first, second));
+                             ^
+    symbol:   method getAddresses(String)
+    location: variable addressService of type AddressService
+  .../service/AddressServiceImplTest.java:58: error: cannot find symbol
+          when(addressRepository.findByUserId(EXISTING_USER_ID)).thenReturn(List.of(first, second));
+                                ^
+    symbol:   method findByUserId(String)
+    location: variable addressRepository of type AddressRepository
+  .../service/AddressServiceImplTest.java:60: error: cannot find symbol
+          List<Address> result = addressService.getAddresses(EXISTING_USER_ID);
+                                               ^
+    symbol:   method getAddresses(String)
+    location: variable addressService of type AddressServiceImpl
+  8 errors total (3 in AddressControllerTest, 5 in AddressServiceImplTest), all resolving to the
+  same two missing symbols: AddressService.getAddresses(String), AddressRepository.findByUserId(String).
+
+  FAILURE: Build failed with an exception.
+  > Task :compileTestJava FAILED
+  ```
+
+### T-004 — green
+- when: 2026-09-11T16:53:00+09:00
+- files changed:
+  - `src/main/java/com/keycloak/userstorage/repository/AddressRepository.java` — added `List<Address> findByUserId(String userId)` derived query.
+  - `src/main/java/com/keycloak/userstorage/service/AddressService.java` — added `List<Address> getAddresses(String userId)` to the interface.
+  - `src/main/java/com/keycloak/userstorage/service/AddressServiceImpl.java` — implemented `getAddresses()`: checks `userRepository.existsById(userId)` (throws `ResponseStatusException(NOT_FOUND, "user not found")` for AC-015, mirroring `createAddress()`'s existing check), then `addressRepository.findByUserId(userId)`.
+  - `src/main/java/com/keycloak/userstorage/controller/AddressController.java` — added `@GetMapping getAddresses(@PathVariable String userId)` returning `ResponseEntity.ok(addresses)`.
+- mid-batch infra fix (not part of the original red batch, user-approved before this block): `AddressControllerTest` is the first `@WebMvcTest` slice test in this repo. Its `ApplicationContext` failed to start because `UserApplication` directly `@Autowired`s `UserRepository`/`CredentialDataRepository` for its `@PostConstruct initData()` seeder — a `@WebMvcTest` slice excludes JPA autoconfiguration, so those beans can't be satisfied and the slice context refuses to start regardless of what `AddressControllerTest` itself asserts. Fixed by extracting the seeder into its own `@Component`:
+  - `src/main/java/com/keycloak/userstorage/DataInitializer.java` (new) — `@Component` holding the two `@Autowired` repository fields and the `@PostConstruct initData()` method, moved verbatim (byte-for-byte body) from `UserApplication`.
+  - `src/main/java/com/keycloak/userstorage/UserApplication.java` — stripped to a bare `@SpringBootApplication` class with only `main()`; removed the two `@Autowired` fields, `initData()`, and now-unused imports (`java.io.*`, `java.time.LocalDateTime`, `java.util.List`, `Autowired`, Jackson types, `CredentialData`/`User`/`JacksonConfig`, both repository imports, `PostConstruct`).
+  - No runtime behaviour change: `DataInitializer` is a normal `@Component`, so `@PostConstruct` still fires during full `SpringApplication` context startup exactly as before (full-suite `UserStorageIntegrationTest`, which depends on the seeded data, stays green — see full-suite result below). `@WebMvcTest` slices, being narrower, correctly never load `DataInitializer`, which is exactly why the split unblocks `AddressControllerTest`.
+- command: `./gradlew test --tests 'com.keycloak.userstorage.controller.AddressControllerTest' --tests 'com.keycloak.userstorage.service.AddressServiceImplTest'`
+- result: PASS — 6/6 (`AddressControllerTest`: `getAddresses_serviceReturnsAddresses_returns200WithList`, `getAddresses_serviceReturnsEmptyList_returns200WithEmptyArray`, `getAddresses_serviceThrows404_returns404`; `AddressServiceImplTest`: `getAddresses_existingUserWithAddresses_returnsAllAddresses`, `getAddresses_existingUserWithNoAddresses_returnsEmptyList`, `getAddresses_nonexistentUser_throws404`), 0 failures, 0 errors.
+- command: `./gradlew test`
+- result: PASS — full suite green, no regressions. `AddressControllerTest`: 3/0/0/0. `AddressServiceImplTest`: 3/0/0/0. `AddressIntegrationTest`: 8/0/0/0 (unchanged). `UserStorageIntegrationTest`: 39/0/0/0 (unchanged — confirms `DataInitializer` extraction preserved seeding behaviour under full context startup). Total 53/53, 0 failures, 0 errors.
+
+### T-004 — refactor
+- when: 2026-09-11T16:55:10+09:00
+- change: `src/main/java/com/keycloak/userstorage/service/AddressServiceImpl.java` — `createAddress()` and `getAddresses()` each had an identical `if (!userRepository.existsById(userId)) { throw new ResponseStatusException(HttpStatus.NOT_FOUND, "user not found"); }` guard. Extracted into a private `requireUserExists(String userId)` method called at the top of both. No behaviour change — same check, same exception, same message, same call order relative to the rest of each method.
+- command: `./gradlew test`
+- result: PASS — unchanged (53/53, 0 failures, 0 errors).
+
+### T-004 — simplify
+- when: 2026-09-11T16:55:40+09:00
+- change: none — reviewed all touched files (`AddressRepository`, `AddressService`, `AddressServiceImpl`, `AddressController`, `DataInitializer`, `UserApplication`). No ternaries, no nesting beyond a single guard clause, no dead options; names (`getAddresses`, `findByUserId`, `requireUserExists`, `DataInitializer`) match `01-spec.md`/`04-tasks.md` glossary terms directly. No edits required.
+- command: `./gradlew test`
+- result: PASS — unchanged (53/53, 0 failures, 0 errors).
+- task status: `done`.

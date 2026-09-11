@@ -1,5 +1,7 @@
 package com.keycloak.userstorage.controller;
 
+import java.util.List;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,5 +36,11 @@ public class AddressController {
     public ResponseEntity<Address> getAddress(@PathVariable String userId, @PathVariable String addressId) {
         Address address = addressService.getAddress(userId, addressId);
         return ResponseEntity.ok(address);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<Address>> getAddresses(@PathVariable String userId) {
+        List<Address> addresses = addressService.getAddresses(userId);
+        return ResponseEntity.ok(addresses);
     }
 }
