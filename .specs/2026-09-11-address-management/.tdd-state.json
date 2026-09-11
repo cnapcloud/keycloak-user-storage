@@ -1,0 +1,81 @@
+{
+  "feature_id": "2026-09-11-address-management",
+  "active_task": null,
+  "tasks": {
+    "T-001": {
+      "phase": "done",
+      "acs_covered": ["AC-001", "AC-002", "AC-003", "AC-012"],
+      "files_in_scope": [
+        "src/main/java/com/keycloak/userstorage/model/Address.java",
+        "src/main/java/com/keycloak/userstorage/repository/AddressRepository.java",
+        "src/main/java/com/keycloak/userstorage/service/AddressService.java",
+        "src/main/java/com/keycloak/userstorage/service/AddressServiceImpl.java",
+        "src/main/java/com/keycloak/userstorage/controller/AddressController.java",
+        "src/test/java/com/keycloak/userstorage/AddressIntegrationTest.java"
+      ],
+      "depends_on": [],
+      "red_at": "2026-09-11T03:27:25Z",
+      "red_failure_excerpt": "expected: <201 CREATED> but was: <404 NOT_FOUND> — POST /user/{userId}/addresses route does not exist yet"
+    },
+    "T-002": {
+      "phase": "pending",
+      "acs_covered": ["AC-004", "AC-005", "AC-013"],
+      "files_in_scope": [
+        "src/main/java/com/keycloak/userstorage/service/AddressServiceImpl.java",
+        "src/test/java/com/keycloak/userstorage/AddressIntegrationTest.java"
+      ],
+      "depends_on": ["T-001"]
+    },
+    "T-003": {
+      "phase": "pending",
+      "acs_covered": ["AC-006", "AC-010", "AC-014"],
+      "files_in_scope": [
+        "src/main/java/com/keycloak/userstorage/repository/AddressRepository.java",
+        "src/main/java/com/keycloak/userstorage/service/AddressServiceImpl.java",
+        "src/main/java/com/keycloak/userstorage/controller/AddressController.java",
+        "src/test/java/com/keycloak/userstorage/AddressIntegrationTest.java"
+      ],
+      "depends_on": ["T-001"]
+    },
+    "T-004": {
+      "phase": "pending",
+      "acs_covered": ["AC-007", "AC-015"],
+      "files_in_scope": [
+        "src/main/java/com/keycloak/userstorage/service/AddressServiceImpl.java",
+        "src/main/java/com/keycloak/userstorage/controller/AddressController.java",
+        "src/test/java/com/keycloak/userstorage/AddressIntegrationTest.java"
+      ],
+      "depends_on": ["T-001"]
+    },
+    "T-005": {
+      "phase": "pending",
+      "acs_covered": ["AC-008", "AC-005", "AC-013", "AC-010", "AC-014"],
+      "files_in_scope": [
+        "src/main/java/com/keycloak/userstorage/service/AddressServiceImpl.java",
+        "src/main/java/com/keycloak/userstorage/controller/AddressController.java",
+        "src/test/java/com/keycloak/userstorage/AddressIntegrationTest.java"
+      ],
+      "depends_on": ["T-003"]
+    },
+    "T-006": {
+      "phase": "pending",
+      "acs_covered": ["AC-009", "AC-010", "AC-014"],
+      "files_in_scope": [
+        "src/main/java/com/keycloak/userstorage/service/AddressServiceImpl.java",
+        "src/main/java/com/keycloak/userstorage/controller/AddressController.java",
+        "src/test/java/com/keycloak/userstorage/AddressIntegrationTest.java"
+      ],
+      "depends_on": ["T-003"]
+    },
+    "T-007": {
+      "phase": "pending",
+      "acs_covered": ["AC-011"],
+      "files_in_scope": [
+        "src/main/java/com/keycloak/userstorage/service/UserServiceImpl.java",
+        "src/main/java/com/keycloak/userstorage/repository/AddressRepository.java",
+        "src/test/java/com/keycloak/userstorage/UserStorageIntegrationTest.java"
+      ],
+      "depends_on": ["T-001"]
+    }
+  }
+}

@@ -26,7 +26,7 @@
 
 | 상태 | feature-id | 요약 |
 |---|---|---|
-| _(없음)_ | | 다음 작업을 `/spec "<설명>"` 으로 시작 |
+| 진행 중 (plan) | `2026-09-11-address-management` | 주소를 User와 별도 엔티티(1:N)로 등록/조회/수정/삭제하는 기본 CRUD |
 
 > `/spec`이 이 표에 새 feature를 `진행 중 (spec)`으로 추가하고, `/review`가 Approve 시 "완료 이력"으로 옮긴다.
 > 상태 라벨: `예정` → `진행 중 (spec)` → 중간 phase는 사람이 갱신 (`(plan)`/`(build)`/`(validate)`) → `/review` Approve → "완료 이력".
