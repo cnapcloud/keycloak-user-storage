@@ -36,9 +36,9 @@ model: sonnet
 ## Process — onboarding hat
 1. **스택 감지.** `.claude/scripts/detect-stack.sh > .specs/_stack.json`.
    `migration == "both"`이면 중단한다 (아래 Refuse if).
-2. **repo 분류.** `src/main/java` · `src/test/java`의 `.java` 파일 목록으로 판정:
-   - **Greenfield** — 생성된 스캐폴딩(`UserApplication.java` + `UserApplicationTests.java`)만.
-   - **Brownfield** — 그 외 파일이 하나라도 있으면. (이 repo는 brownfield.)
+2. **repo 분류.** 소스 루트의 파일 목록으로 판정:
+   - **Greenfield** — 프로젝트 생성기가 자동으로 만든 초기 스캐폴딩만 있음 (이 스택은 Spring Initializr의 `<Main>Application.java` + `<Main>ApplicationTests.java`; 다른 스택은 그에 대응하는 생성 파일).
+   - **Brownfield** — 그 외 파일(도메인 로직·컨트롤러·서비스 등 실제 구현)이 하나라도 있으면. (이 repo는 brownfield — `src/main/java`에 controller/service/repository/model이 이미 있음.)
 3. **baseline 캡처 (Brownfield만).** `.claude/scripts/harness.sh --baseline` →
    `.specs/_baseline.json`. 선행 실패는 **고치지 않고** 캡처만 한다. Greenfield이면 건너뛴다.
 4. **onboarding 리포트.** `.specs/_onboarding.md`에:

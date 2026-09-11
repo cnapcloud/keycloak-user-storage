@@ -4,7 +4,7 @@ description: The architecture rules the layer conventions imply, as ArchUnit tes
 ---
 # ArchUnit rules
 
-Turns `spring-layer-conventions` from prose into executable rules. Rules live in `src/test/java/com/keycloak/userstorage/ArchitectureTest.java` (added when the archunit layer is wired — see `.claude/docs/harness-gradle.md`).
+Turns `spring-layer-conventions` from prose into executable rules.
 
 ## Rule set
 | # | Rule | Rationale |

@@ -107,16 +107,17 @@ dependencies {
     testImplementation 'com.tngtech.archunit:archunit-junit5:1.3.0'
 }
 ```
-Add `src/test/java/com/keycloak/userstorage/ArchitectureTest.java` implementing the rule
-set in `.claude/skills/archunit-rules/SKILL.md`. Freeze pre-existing violations with
+Add `src/test/java/<root-package-path>/ArchitectureTest.java` (this project:
+`com/keycloak/userstorage`) implementing the rule set in
+`.claude/skills/archunit-rules/SKILL.md`. Freeze pre-existing violations with
 `FreezingArchRule.freeze(rule)`. Rules run inside the normal `test` task.
 
 ### 5. PIT mutation
 ```groovy
 plugins { id 'info.solidsoft.pitest' version '1.15.0' }
 pitest {
-    targetClasses = ['com.keycloak.userstorage.*']
-    targetTests   = ['com.keycloak.userstorage.*']
+    targetClasses = ['<root-package>.*']   // this project: 'com.keycloak.userstorage.*'
+    targetTests   = ['<root-package>.*']   // this project: 'com.keycloak.userstorage.*'
     threads = 4
     mutationThreshold = 0        // ratchet up from baseline; absolute target 75
     outputFormats = ['XML', 'HTML']
@@ -166,3 +167,4 @@ keep this layer `skipped` and track CVEs manually.
   above turns it on.
 
 ---
+

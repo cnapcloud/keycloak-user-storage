@@ -16,6 +16,23 @@
 
 ---
 
+## Greenfield로 처음 시작할 때 (`/onboard` 이전 순서)
+
+이 repo는 이미 onboard됐지만, 새 repo에서 처음 시작한다면 `/onboard` 전에 순서가 있다:
+
+- **프로젝트 스캐폴딩** — Spring Initializr로 먼저 생성한다.
+  `/onboard`는 스캐폴딩을 만들어주지 않는다 — `src/main/java` · `src/test/java`에 이미 있는
+  파일을 보고 greenfield/brownfield를 분류할 뿐이다 (`.claude/agents/architect.md` 참조).
+- **harness layer 구성** — `.claude/docs/harness-gradle.md`를 참조해 checkstyle·spotbugs·
+  archunit·mutation·openapi·owasp 중 쓸 레이어를 `build.gradle`에 이때 넣는다.
+  `/onboard`는 그 시점의 `build.gradle` 구성을 스캔·기록만 하고(`detect-stack.sh`), 레이어를
+  직접 설정해주지 않는다.
+- **그다음 `/onboard`** — 이 순서를 지키지 않고 나중에 레이어를 추가하면, 이미 캡처된
+  `_baseline.json`을 `--baseline` 재실행으로 다시 캡처해야 한다 (브라운필드 기준선 관리
+  절차와 동일 — 아래 "baseline에 실패가 있으면" 참조).
+
+---
+
 ## 산출물 흐름
 
 각 명령이 `.specs/<날짜>-<기능이름>/` 아래에 번호 매긴 파일을 만든다.
