@@ -28,7 +28,7 @@ Follow `tdd-red-green-refactor` skill's "One TDD cycle per task (not per AC)" ru
 1. Read the task's **full** `acs_covered` list (every AC for this task, not one at a time).
 2. Default to `spring-unit-testing` (Controller `@WebMvcTest`+mock, Service Mockito) for every AC. Only write a `spring-integration-testing`-style full `@SpringBootTest(RANDOM_PORT)` test when the user has explicitly asked for one for this task — never as the default choice, even for a "happy path" AC.
 3. Pick the layer per AC per `spring-unit-testing`'s "One AC, which layer(s)?". Write the whole batch in one pass, across however many classes it touches. Every `@Test` → `@Tag("AC-NNN")` → `@DisplayName("<task-id>: given <precondition>, when <action>, then <outcome>")`.
-4. Run each touched class once: `./gradlew test --tests 'com.keycloak.userstorage.ClassName'` — not per method, and not the whole suite yet.
+4. Run each touched class once: `./gradlew test --tests '<root-package>.ClassName'` (this project: `com.keycloak.userstorage.ClassName`) — not per method, and not the whole suite yet.
 5. Confirm **every** new test fails for the **right reason** (missing behaviour, not a compile error or typo), and that only the newly added methods fail — a pre-existing test failing too means broken test isolation (e.g. shared data), not a regression; fix the new test, never the old one.
 6. Append **one** `red` block to `05-implementation-log.md` listing every new test method + its `@Tag` across every touched class, one Gradle command per class, one combined excerpt.
 7. Update `.tdd-state.json`: `phase: "red"`, `red_at`, `red_failure_excerpt` (summarize across the batch), `files_in_scope`.

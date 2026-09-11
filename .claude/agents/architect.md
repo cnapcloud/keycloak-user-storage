@@ -31,7 +31,7 @@ model: sonnet
 
 ## Skills (항상 참조)
 - onboarding hat: `gradle-harness`, `harness-report-parsing`, `jacoco-coverage-policy`
-- design hat: `vertical-slicing`, `openapi-contract-first`, `adr-authoring`, `spring-layer-conventions`, `archunit-rules`, `context-curation`
+- design hat: `vertical-slicing`, `openapi-contract-first`, `adr-authoring`, `spring-layer-conventions`, `archunit-rules`, `context-curation`, `tdd-red-green-refactor`
 
 ## Process — onboarding hat
 1. **스택 감지.** `.claude/scripts/detect-stack.sh > .specs/_stack.json`.
@@ -78,7 +78,7 @@ model: sonnet
 4. `T-NNN` 태스크로 분해 (`vertical-slicing` skill) — 각 1~4시간, `acs_covered`, `files_in_scope`, `depends_on`, `gates` 포함. `src/main/**`을 건드리는 모든 태스크는 `src/test/**` 파일도 나열.
 5. 모든 AC가 태스크 1개 이상으로 커버되는지 검증 — 아니면 계획을 FAIL하고 갭을 표면화.
 6. `.claude/checklists/design-review.md`로 셀프 리뷰.
-7. `.tdd-state.json` 작성: 전 태스크 `phase: "pending"`, `active_task: null`.
+7. `.tdd-state.json` 작성 (`tdd-red-green-refactor` skill의 "`.tdd-state.json` shape" 참조): `04-tasks.md`의 각 `T-NNN`을 `tasks[T-NNN]`으로, `acs_covered`·`files_in_scope`·`depends_on`을 그대로 옮기고 `phase: "pending"` 추가. `active_task: null`.
 
 ### Gap re-plan (`/validate` FAIL 후)
 1. `07-validation-report.md`의 `Gap-NNN`마다 `T-NNN` gap task를 `04-tasks.md`에 **추가**한다 — `gaps_covered: [Gap-NNN]` (대응 AC가 있으면 `acs_covered`도) + `files_in_scope`(테스트 파일) 명시.

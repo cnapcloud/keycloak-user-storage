@@ -26,10 +26,11 @@ Follow `tdd-red-green-refactor` skill's "One TDD cycle per task (not per AC)" ru
 1. Verify `.tdd-state.json` is in `red` with a non-empty `red_failure_excerpt` (the hook enforces this anyway).
 2. Edit only `files_in_scope`.
 3. Minimum code only to satisfy **every** currently-red test in this task's batch — implement exactly what those visible tests assert, nothing beyond. No speculative interfaces, no unused parameters, no "while I'm here" cleanups, no handling for cases none of the red tests exercise.
-4. Run the whole test class once: `./gradlew test --tests 'com.keycloak.userstorage.ClassName'`. Every test in it must pass.
+4. Run the whole test class once: `./gradlew test --tests '<root-package>.ClassName'` (this project: `com.keycloak.userstorage.ClassName`). Every test in it must pass.
 5. Run the full suite: `./gradlew test`. No regressions.
    - Only this task's batch of tests should flip from fail to pass. If a test that wasn't added by this task fails after the change, that's a regression — fix the implementation, never the old test.
    - If a code fix can't satisfy both (a real spec conflict): don't set `phase` to `done`. Report the conflicting existing test and the new AC to the user and wait for a decision.
+   - If the fix requires editing a file outside `files_in_scope` (out-of-scope regression, not a spec conflict — the batch's own code is fine, it just exposed a pre-existing bug elsewhere): follow `tdd-red-green-refactor` skill's "Blocked: out-of-scope regression found mid-task" — set `blocked_reason`, hold `phase` at whatever step just completed, and stop for a user decision.
 6. Append **one** `green` block covering the whole batch. Set `.tdd-state.json` `phase: "green"`.
 
 **After a gap-exception test** (test-engineer added one method mid-task, see that agent's "Gap exception"): same steps, but step 4 must still run the **whole class**, not just the new method — a localized fix can touch shared code the batch's other already-green tests depend on. Step 5's full-suite run is not optional in this path either.
