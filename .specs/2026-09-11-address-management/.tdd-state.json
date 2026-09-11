@@ -87,14 +87,16 @@
       "red_failure_excerpt": ":compileTestJava FAILED — 6 compiler errors (3 in AddressServiceImplTest, 3 in AddressControllerTest), all 'cannot find symbol' for AddressService.deleteAddress(String, String), which does not exist in src/main yet (test-engineer never edits src/main/**, so red for a new interface method is a compile-time symbol-not-found, not a runtime failure, same pattern as T-004/T-005). implementer adds deleteAddress to AddressService/AddressServiceImpl (reusing findByIdAndUserId for 404, then addressRepository.deleteById) and a DELETE /{addressId} mapping to AddressController in green."
     },
     "T-007": {
-      "phase": "pending",
+      "phase": "done",
       "acs_covered": ["AC-011"],
       "files_in_scope": [
         "src/main/java/com/keycloak/userstorage/service/UserServiceImpl.java",
         "src/main/java/com/keycloak/userstorage/repository/AddressRepository.java",
-        "src/test/java/com/keycloak/userstorage/integration/UserStorageIntegrationTest.java"
+        "src/test/java/com/keycloak/userstorage/service/UserServiceImplTest.java"
       ],
-      "depends_on": ["T-001"]
+      "depends_on": ["T-001"],
+      "red_at": "2026-09-11T19:00:00Z",
+      "red_failure_excerpt": ":compileTestJava FAILED — cannot find symbol AddressRepository.deleteByUserId(String); UserServiceImplTest is a new file, does not exist in src/main yet (test-engineer never edits src/main/**, so red for a new repository method is a compile-time symbol-not-found, same pattern as T-004/T-005/T-006). implementer adds deleteByUserId to AddressRepository, a second AddressRepository constructor param to UserServiceImpl, and the deleteUser() ordering (delete addresses before deleting the user) in green."
     }
   }
 }

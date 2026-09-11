@@ -14,16 +14,19 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.keycloak.userstorage.model.MultiAttributeEntry;
 import com.keycloak.userstorage.model.User;
+import com.keycloak.userstorage.repository.AddressRepository;
 import com.keycloak.userstorage.repository.UserRepository;
 
 @Service
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final AddressRepository addressRepository;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, AddressRepository addressRepository) {
         this.userRepository = userRepository;
+        this.addressRepository = addressRepository;
     }
 
     @Override
@@ -134,6 +137,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void deleteUser(String id) {
         User user = findByIdOrUsername(id);
+        addressRepository.deleteByUserId(user.getId());
         userRepository.deleteById(user.getId());
     }
 
