@@ -29,7 +29,7 @@ Follow `tdd-red-green-refactor` skill's "One TDD cycle per task (not per AC)" ru
 2. Choose the smallest scope per AC: plain unit test ≺ Spring slice ≺ full `@SpringBootTest(RANDOM_PORT)` integration test. Match the existing `UserStorageIntegrationTest` style when hitting real endpoints.
 3. Write **one test per AC** in `acs_covered`, all in the same test class, in a single pass. Every `@Test` carries **all three** lines in order: `@Test` → `@Tag("AC-NNN")` → `@DisplayName("<task-id>: given <precondition>, when <action>, then <outcome>")`.
 4. Run the whole class once: `./gradlew test --tests 'com.keycloak.userstorage.ClassName'` — not per method.
-5. Confirm **every** new test fails for the **right reason** (missing behaviour, not a compile error or typo). Fix any test that fails for the wrong reason before moving on.
+5. Confirm **every** new test fails for the **right reason** (missing behaviour, not a compile error or typo), and that only the newly added methods fail — a pre-existing test failing too means broken test isolation (e.g. shared data), not a regression; fix the new test, never the old one.
 6. Append **one** `red` block to `05-implementation-log.md` listing every new test method + its `@Tag`, one command, one combined excerpt.
 7. Update `.tdd-state.json`: `phase: "red"`, `red_at`, `red_failure_excerpt` (summarize across the batch), `files_in_scope`.
 8. Hand off to `implementer`.
