@@ -4,6 +4,32 @@
 
 ---
 
+## 처음 시작할 때: `/onboard`
+
+repo당 **1회만** 실행하는 command. `.specs/_stack.json`(스택 분류) · `_baseline.json`(harness
+기준선) · `_onboarding.md`(분류 결과 + 권장 첫 `/spec`)를 만든다. 이 세 파일이 이미 있으면
+(이 repo처럼) onboard는 끝난 것 — 다시 실행할 필요 없다.
+
+`/onboard`는 `src/main/java` · `src/test/java`에 있는 파일을 보고 repo를 둘 중 하나로 분류한다
+(`.claude/agents/architect.md` 참조):
+
+- **Greenfield** — 코드가 없거나 거의 없는 새 프로젝트. 기준선에 잡을 "기존 실패"가 없다.
+- **Brownfield** — 이미 동작하는 코드베이스.
+
+> **이 repo는 이미 Brownfield로 onboard 완료됨** (`.specs/_onboarding.md`)
+
+**Greenfield repo라면 `/onboard` 전에 순서가 있다** — `/onboard`는 스캐폴딩도 harness 레이어
+설정도 만들어주지 않고, 그 시점 `build.gradle`/소스 상태를 스캔·기록만 하기 때문:
+
+1. **프로젝트 스캐폴딩** — Spring Initializr로 먼저 생성한다.
+2. **harness layer 구성** — `.claude/docs/harness-gradle.md`를 참조해 checkstyle·spotbugs·
+   archunit·mutation·openapi·owasp 중 쓸 레이어를 `build.gradle`에 이때 넣는다.
+3. **그다음 `/onboard`** 실행.
+
+> onboard 이후 레이어를 추가/변경했다면 `.claude/scripts/harness.sh --baseline`를 실행한다.
+
+---
+
 ## 개발자가 하는 일은 3가지뿐
 
 1. 명령을 순서대로 입력한다: `/spec` → `/spec-review` → `/plan` → `/build T-NNN` (태스크 수만큼) → `/validate` → `/review`
@@ -11,25 +37,6 @@
 3. `/build` 태스크 사이마다 `git commit` 한다. (agent는 자동 커밋 안 함 — 요청하면 대신 해준다)
 
 나머지(hook, skill, agent, template)는 명령 안에서 자동으로 돌아간다. 직접 부르지 않는다.
-
-`/onboard`는 repo당 1회. 이미 실행됨 (`.specs/_stack.json`, `_baseline.json`, `_onboarding.md` 존재).
-
----
-
-## Greenfield로 처음 시작할 때 (`/onboard` 이전 순서)
-
-이 repo는 이미 onboard됐지만, 새 repo에서 처음 시작한다면 `/onboard` 전에 순서가 있다:
-
-- **프로젝트 스캐폴딩** — Spring Initializr로 먼저 생성한다.
-  `/onboard`는 스캐폴딩을 만들어주지 않는다 — `src/main/java` · `src/test/java`에 이미 있는
-  파일을 보고 greenfield/brownfield를 분류할 뿐이다 (`.claude/agents/architect.md` 참조).
-- **harness layer 구성** — `.claude/docs/harness-gradle.md`를 참조해 checkstyle·spotbugs·
-  archunit·mutation·openapi·owasp 중 쓸 레이어를 `build.gradle`에 이때 넣는다.
-  `/onboard`는 그 시점의 `build.gradle` 구성을 스캔·기록만 하고(`detect-stack.sh`), 레이어를
-  직접 설정해주지 않는다.
-- **그다음 `/onboard`** — 이 순서를 지키지 않고 나중에 레이어를 추가하면, 이미 캡처된
-  `_baseline.json`을 `--baseline` 재실행으로 다시 캡처해야 한다 (브라운필드 기준선 관리
-  절차와 동일 — 아래 "baseline에 실패가 있으면" 참조).
 
 ---
 
@@ -55,155 +62,95 @@
 
 ---
 
-## 워크스루: 주소 관리 기능
+## 워크스루: 주소 관리 기능 (`.specs/2026-09-11-address-management/` 실제 완료 사례)
 
-### 1. `/spec "사용자 주소 관리 기능 추가"`
+### 1. `/spec "주소 관리 기능"`
 
-`spec-author` agent가 `.specs/2026-09-08-user-address/01-spec.md` 초안을 만든다.
-요청/코드에 없는 값은 지어내지 않고 `## Open Questions`에 남긴다:
+`spec-author` agent가 `01-spec.md` 초안을 만들고, 값이 정해지지 않은 부분은 `Q-001`~`Q-008`로
+남긴다(엔드포인트 nest 여부, 단건/목록 조회 제공 범위, id 포맷, 필드별 검증 규칙, 404 처리,
+cascade 삭제 여부, 응답 필드, 개수 상한 등).
 
-```
-## Open Questions
+**당신이 하는 것** — 각 질문에 답한다. 이번엔 "예시이니 일반적인 상황을 가정해서 답을 채워라"고
+지시했고, agent가 그 지시에 따라 통상적인 REST 기본값(User 하위 nest, `addr-XXXXXXXX` id,
+우편번호 5자리/도로명주소 필수, 사용자 삭제 시 cascade, 개수 무제한 등)으로 `## Resolved
+Questions`를 채우고 AC를 확정했다 — 최종 `01-spec.md`에는 이 답이 "티켓 값"이 아니라 "합리적
+기본값"이라는 표시가 남는다. 실제 값을 알고 있다면 이렇게 위임하지 말고 직접 답하는 편이 낫다.
 
-- Q-001: 주소는 USP 필수 엔드포인트가 아니다. Keycloak이 이 데이터를 호출하나,
-         아니면 관리 목적의 자체 API인가?
-  - Why it matters: 스펙 외 엔드포인트는 이 프로젝트에서 제거 대상 (BL-09 선례)
-  - Status: open
-
-- Q-002: 사용자당 주소 1개인가, 여러 개(집/직장 등)인가?
-  - Status: open
-
-- Q-003: 저장 위치 — 새 USER_ADDRESS 테이블인가, 기존 attributes 맵에 문자열로 넣나?
-  - Status: open
-
-- Q-004: 필수 필드 목록과 우편번호/국가코드 포맷 검증 규칙은?
-  - Status: open
-```
-
-**당신이 하는 것** — 각 질문에 답한다. 예:
-
-> Q-001: 자체 관리 API다. Keycloak은 호출 안 함.
-> Q-002: 여러 개. 각 주소에 label(집/직장) 붙음.
-> Q-003: 새 USER_ADDRESS 테이블. attributes는 key=value 한 쌍이라 구조적 데이터에 안 맞음.
-> Q-004: 필수 = label, line1, city, postalCode, country. postalCode는 문자열 그대로 저장(검증 안 함). country는 ISO 3166-1 alpha-2.
-
-agent가 답을 `## Resolved Questions`로 옮기고(그 항목은 `## Open Questions`에서 사라진다) AC를 확정한다.
-동시에 `.specs/README.md` "진행 중 / 예정" 표에 이 feature 행을 `진행 중 (spec)`으로 추가한다.
-
-```
-- AC-001: When 클라이언트가 존재하는 사용자 id로 POST /user/{id}/addresses 를 유효한 본문과 함께 호출하면,
-          the system shall 주소를 저장하고 201과 생성된 주소 id를 반환한다.
-- AC-002: If 사용자 id가 없으면, then the system shall 404와 {"error": "user not found"} 를 반환한다.
-- AC-003: If 필수 필드가 누락되면, then the system shall 400과 {"error": "..."} 를 반환한다.
-- AC-004: When GET /user/{id}/addresses 를 호출하면, the system shall 해당 사용자의 주소 배열을 반환한다.
-- AC-005: When DELETE /user/{id}/addresses/{addressId} 를 호출하면, the system shall 204를 반환한다.
-- AC-006: When 사용자가 삭제되면, the system shall 그 사용자의 모든 주소도 함께 삭제한다.
-```
-
-> 미해결 `Q-NNN`이 하나라도 남아 있으면 `src/**` 편집이 hook에 막힌다. 다음 단계로 못 감.
+결과: **AC-001~AC-015** (15개). 미해결 `Q-NNN`이 남아 있으면 `src/**` 편집이 hook에 막힌다.
 
 ### 2. `/spec-review`
 
-같은 agent가 체크리스트(`.claude/checklists/spec-review.md`)로 스펙을 감사 → `02-spec-review.md`에 `PASS` 또는 `FAIL` + 사유.
-FAIL이면 `/spec --continue`로 고친 뒤 다시 리뷰. PASS면 다음.
+체크리스트로 스펙을 감사한다. 이번 라운드에서 실제로 지적된 것: AC-005와 AC-010이
+"조건 A 또는 B → 같은 결과"로 묶여 있어 atomic 규칙(항목 5) 위반 — 각각 AC-013(도로명주소
+공백), AC-014(소유자 불일치)로 쪼개서 재작성했다. `/plan` 진행 중 발견된 목록 조회 404 누락도
+`AC-015`로 별도 보완. → `02-spec-review.md`: **PASS** (acs_total 15, open_questions 0).
+
+FAIL이었다면 `/spec --continue`로 고친 뒤 다시 리뷰.
 
 ### 3. `/plan`
 
-`architect` agent가 3개를 만든다.
+`architect` agent가 `03-design.md` + `04-tasks.md` + ADR 3개 + `.tdd-state.json`을 만든다.
 
-`03-design.md` — API 계약(OpenAPI 스케치) + 레이어 설계:
+- 레이어: `AddressController → AddressService(iface)/Impl → AddressRepository → Address`.
+  이 repo 최초의 "자체 PK를 갖는 1:N 자식 엔티티"라 설계 결정마다 대안이 있었고, 그래서
+  ADR도 3개나 나왔다 — **ADR-001** JPA `@OneToMany` 대신 평범한 `userId` 컬럼 + 파생 쿼리
+  (이유: 코드베이스에 JPA 연관관계 전례가 전무), **ADR-002** id 포맷 `addr-XXXXXXXX`를
+  `User`와 동일하게 서비스 레이어에서 수동 생성, **ADR-003** Bean Validation 대신 수동
+  `if` 검증(이유: 이 repo에 `@NotBlank`류 전례가 전무).
+- 태스크 7개(`T-001`~`T-007`), 각각 `files_in_scope`로 편집 가능 파일이 화이트리스트로 고정됨.
 
-```
-POST /user/{id}/addresses
-  201 → {"id": "addr-3f2a1c9b", "label": "집", ...}
-  404 → {"error": "user not found"}
-  400 → {"error": "line1 is required"}
+**당신이 하는 것** — 설계와 ADR을 검토. 대안이 왜 기각됐는지(주로 "이 코드베이스에 전례 없음")가
+근거로 붙어 있으니 그게 납득되는지 확인.
 
-레이어:
-  AddressController  → AddressService(iface) → AddressServiceImpl → AddressRepository
-  model: Address (PK addr-XXXXXXXX, FK userId, label/line1/line2/city/postalCode/country)
-  User 1..* Address — 사용자 삭제 시 cascade
-ADR-001: 새 테이블 vs attributes 맵 → 새 테이블 (구조적 데이터, 조회 패턴)
-```
+### 4. `/build T-001` ~ `/build T-007`
 
-`04-tasks.md` — 태스크 분해:
+태스크마다 red(실패 테스트) → green(최소 구현) → refactor → simplify. 끝나면 커밋 메시지를
+제안하고 멈춘다 — `git add -A && git commit` 후 다음 태스크로.
 
-```
-| ID    | Title                              | acs_covered      | depends_on |
-| T-001 | Address 엔티티 + Repository        | AC-001           | —          |
-| T-002 | POST /user/{id}/addresses 생성     | AC-001,002,003   | T-001      |
-| T-003 | GET /user/{id}/addresses 조회      | AC-004           | T-002      |
-| T-004 | DELETE + 사용자 삭제 cascade       | AC-005,006       | T-002      |
-```
-
-각 태스크에 `files_in_scope`(건드려도 되는 파일 화이트리스트)와 `gates`가 붙는다.
-`.tdd-state.json`도 이때 생성된다.
-
-**당신이 하는 것** — 설계와 태스크 분해를 검토. 이상하면 지적, 괜찮으면 승인.
-
-> `/plan`을 두 번째로 부르는 경우는 `03-design.md`/`04-tasks.md` 유무와 `07-validation-report.md`
-> 상태로 모드가 갈린다: 산출물 없음 → 신규 설계 / `/validate` FAIL + `Gap-NNN` → gap re-plan(추가만) /
-> 그 외(build 진행 중 등) → 거부. build 도중엔 `/plan`을 다시 부르지 않는다.
-
-### 4. `/build T-001` (태스크마다 반복)
-
-`git status`가 깨끗해야 시작된다(이전 태스크 커밋 필수). 그다음 4단계가 강제된다:
-
-1. **red** — `test-engineer`가 실패하는 테스트를 먼저 쓴다. `@Tag("AC-001")` 붙임. 실행해서 빨간 것 확인 → 실패 로그를 `.tdd-state.json`에 기록.
-   (이 기록이 없으면 `src/main/**` 편집이 hook에 막힌다)
-2. **green** — `implementer`가 테스트를 통과시킬 **최소 코드**만 쓴다. `files_in_scope` 밖 파일 건드리면 막힌다.
-3. **refactor** — 동작 유지하며 구조 정리. 테스트 재실행.
-4. **simplify** — 삼항 풀기, early return, 스펙 용어로 이름짓기.
-
-끝나면 `.tdd-state.json` phase=done, 커밋 메시지를 제안하고 **멈춘다**.
-
-**당신이 하는 것:**
-
-```bash
-git add -A && git commit      # agent가 안 하므로 직접
-/build T-002                   # 다음 태스크
-```
-
-T-002 → 커밋 → T-003 → 커밋 → T-004 → 커밋.
+**실제로 걸렸던 부분**: `traceability.sh`는 테스트의 `@Tag("AC-NNN")`만 보고 `@DisplayName`
+문구는 보지 않는다. T-001의 "무제한 등록" 테스트(AC-012)에 `@Tag("AC-001")`만 붙이고
+`@Tag("AC-012")`를 빠뜨렸는데, 태그를 안 봐도 테스트 자체는 통과하기 때문에 `/build` 단계에서는
+안 걸리고 `/validate`의 traceability 매트릭스에서만 "AC-012 미커버(`Gap-001`)"로 드러났다.
+→ 태그 하나 추가하는 것만으로 해소(아래 5, 6 참조). **AC를 검증하는 로직이 있어도 태그를
+빠뜨리면 harness는 못 잡아준다** — `/build`에서 태그를 정확히 다는 게 핵심.
 
 ### 5. `/validate`
 
-`validator` agent가 `.claude/scripts/harness.sh`를 돌리고 리포트를 **읽어서** 판정한다.
+`.claude/scripts/harness.sh` 실행 후 리포트를 읽어 판정.
 
 ```
 07-validation-report.md:
-  unit:     pass (신규 12 테스트 통과, 기준선 대비 회귀 0)
-  coverage: 신규 라인 96% (기준 95%) → pass
-  verdict:  PASS
+  unit: pass — 71 tests, 0 failures (baseline 39t/0f 대비 회귀 없음, +32 신규 전부 green)
+  coverage / archunit / checkstyle / spotbugs / mutation: skipped (레이어 미배선, baseline과 동일)
+  verdict: PASS
 
-07a-traceability.md:
-  AC-001 → T-002 → AddressControllerTest.create_validBody_returns201 → AddressController.java:24 → unit covered
-  AC-006 → T-004 → ...
+07a-traceability.md: AC-001~015 15/15 covered (Gap-001은 이 라운드에서 해소)
 ```
 
-`/validate`는 `.specs/_baseline.json` 대비 **회귀만** 막는다 — baseline에 이미 있던 실패는 통과시키고
-**새로 생긴 실패만** FAIL. FAIL이면 원인 태스크로 돌아가 `/build`로 고친다.
-(baseline 자체에 실패 게이트가 있는 경우는 아래 "baseline에 실패가 있으면" 참조.)
+`/validate`는 baseline 대비 **회귀만** 막는다 — 이 4개 레이어가 skipped인 것도 baseline과
+동일해서 문제 삼지 않는다. FAIL이면 원인 태스크로 돌아가 `/build`.
 
 ### 6. `/review`
 
-diff를 루브릭 9개 항목(1 추적성 · 2 레이어 경계 · 3 Spring 관용 · 4 에러 처리 · 5 데이터 접근 ·
-6 날짜/직렬화 · 7 테스트 품질 · 8 명료성 · 9 마이그레이션/계약)으로 대조 → `08-code-review.md`.
-`must-fix` 있으면 고치고 `/validate`부터 다시. `Approve`면 `.specs/README.md`의 이 feature 행을
-자동으로 "완료 이력"으로 옮긴다.
+diff를 루브릭 9개 항목으로 대조 → `08-code-review.md`. 실제 결과: **should-fix 1건**
+(F-001 — 위 AC-012 태그 수정이 작업 트리에는 있지만 아직 커밋 안 됨, "이 파일도 커밋에
+포함하라"는 지적), nit 2건(field injection 하나가 새 클래스 관례와 다름, 컨트롤러에 불필요한
+`@Transactional` — 둘 다 기존 관례를 그대로 옮긴 것이라 must-fix 아님), praise 2건(레이어 분리,
+ADR 3개 다 남긴 것). **must-fix 0 → Approve.**
+
+Approve되면 `.specs/README.md`의 이 feature 행이 자동으로 "완료 이력"으로 옮겨진다.
 
 ### 7. 커밋 / PR
 
-**개발자가 직접.** agent는 자동 커밋하지 않지만, 명시적으로 요청하면 `git commit`은 해준다. `git push`는 권한 deny로 막혀 있다.
+**개발자가 직접.** agent는 자동 커밋하지 않지만 명시적으로 요청하면 `git commit`은 해준다.
+`git push`는 권한 deny로 막혀 있다.
 
 ```bash
-git push -u origin feature/user-address
+git push -u origin spec/2026-09-11-address-management
 gh pr create
 ```
 
-`.specs/README.md`의 완료 처리는 `/review` Approve가 이미 했다 — PR만 올리면 된다.
-(선행 실패를 고치는 feature였다면 **머지 가능 상태에서 `harness.sh --baseline` 재실행** —
-아래 "baseline에 실패가 있으면".)
+`.specs/README.md` 완료 처리는 `/review` Approve가 이미 했다 — PR만 올리면 된다.
 
 ---
 
